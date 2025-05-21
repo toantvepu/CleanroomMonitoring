@@ -79,40 +79,42 @@
     </div>
 </div>
 <!-- Real-time Monitoring Panel -->
+<!-- Thêm vào Dashboard/Index.cshtml -->
+<!-- Real-time Monitoring Panel -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-body">
-                <div class="realtime-monitoring">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="m-0" id="roomName">
-                            <!-- Sẽ được cập nhật bằng JavaScript -->
-                        </h6>
-                        <span class="badge bg-secondary">
-                            <i class="bi bi-clock"></i> Last updated: <span id="lastUpdateTime"></span>
-                        </span>
-                    </div>
-                    <!-- Dropdown chọn phòng -->
-                    <div class="dropdown">
+            <div class="card-header">
+                <h5 class="card-title">Theo dõi thời gian thực</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div id="roomName">
                         <select id="roomSelector" class="form-select form-select-sm">
                             <option value="0">All Rooms</option>
-                            @if (ViewBag.CleanRooms != null)
-                            {
+                            @if (ViewBag.CleanRooms != null) {
                                 foreach (var room in ViewBag.CleanRooms) {
-                                    <option value="@room.RoomName"></option>
+                                    <option value="@room.RoomID">@room.RoomName</option>
                                 }
                             }
                         </select>
+                        <!-- Sẽ được cập nhật bằng JavaScript -->
+                    </div>
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-clock"></i> Cập nhật lần cuối: <span id="lastUpdateTime"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Container cho dữ liệu cảm biến, will be populated by JavaScript -->
+                <div id="sensorContainer" data-api-url="@Url.Action("realtime", "SensorDataApi")" data-api-base-url="">
+                    <!-- Thông báo đang tải -->
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle me-2"></i> Đang tải dữ liệu cảm biến...
+                    </div>
                 </div>
 
-                <span class="badge bg-secondary">
-                    <i class="bi bi-clock"></i> Last updated: <span id="lastUpdateTime"></span>
-                </span>
-            </div>
-                <div id="sensorContainer" data-api-url="@Url.Action("realtime", "SensorDataApi", new { area = "api" })"></div>
-                <!-- Container cho từng cảm biến, sẽ được tạo động bằng JavaScript -->
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle me-2"></i> Loading sensor data...
+                <!-- Container cho các biểu đồ và dữ liệu chi tiết -->
+                <div id="sensorContainer">
+                    <!-- Sẽ được điền bởi JavaScript -->
                 </div>
             </div>
         </div>

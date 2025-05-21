@@ -264,8 +264,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>yky6ftuirz</Fingerprint>
-      <Integrity>kldlpiqJjtYByymvZEHk2FoJPTRCnkztYcDcHDYMvzY=</Integrity>
+      <Fingerprint>olyamw63oc</Fingerprint>
+      <Integrity>rENdQAfcuz1H88XxhO4iOMo1/eK52MtqDlxJm9pzsWk=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\cleanroom-monitoring.js'))</OriginalItemSpec>

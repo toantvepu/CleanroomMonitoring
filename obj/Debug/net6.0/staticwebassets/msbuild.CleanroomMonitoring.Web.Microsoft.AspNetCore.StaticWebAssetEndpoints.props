@@ -171,14 +171,14 @@
     <StaticWebAssetEndpoint Include="_content/CleanroomMonitoring.Web/js/cleanroom-monitoring.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\cleanroom-monitoring.js'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-kldlpiqJjtYByymvZEHk2FoJPTRCnkztYcDcHDYMvzY="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15370"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022kldlpiqJjtYByymvZEHk2FoJPTRCnkztYcDcHDYMvzY=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 11:25:01 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-rENdQAfcuz1H88XxhO4iOMo1/eK52MtqDlxJm9pzsWk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15369"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022rENdQAfcuz1H88XxhO4iOMo1/eK52MtqDlxJm9pzsWk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 21 May 2025 03:43:36 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/CleanroomMonitoring.Web/js/cleanroom-monitoring.yky6ftuirz.js">
+    <StaticWebAssetEndpoint Include="_content/CleanroomMonitoring.Web/js/cleanroom-monitoring.olyamw63oc.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\cleanroom-monitoring.js'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"yky6ftuirz"},{"Name":"integrity","Value":"sha256-kldlpiqJjtYByymvZEHk2FoJPTRCnkztYcDcHDYMvzY="},{"Name":"label","Value":"_content/CleanroomMonitoring.Web/js/cleanroom-monitoring.js"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"15370"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022kldlpiqJjtYByymvZEHk2FoJPTRCnkztYcDcHDYMvzY=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 11:25:01 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"olyamw63oc"},{"Name":"integrity","Value":"sha256-rENdQAfcuz1H88XxhO4iOMo1/eK52MtqDlxJm9pzsWk="},{"Name":"label","Value":"_content/CleanroomMonitoring.Web/js/cleanroom-monitoring.js"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"15369"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022rENdQAfcuz1H88XxhO4iOMo1/eK52MtqDlxJm9pzsWk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 21 May 2025 03:43:36 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/CleanroomMonitoring.Web/js/home.5ob3tpopt4.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\home.js'))</AssetFile>
