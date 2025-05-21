@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Welcome to the Admin Dashboard</h5>
+            </div>
+            <div class="card-body">
+                <p>Welcome to the administrative area of the Clean Room Monitoring System. Here you can manage clean rooms, sensors, and other system settings.</p>
+                <p>Select an option from the navigation menu to get started.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Clean Rooms</h5>
+            </div>
+            <div class="card-body">
+                <p>Manage clean rooms throughout your facilities.</p>
+                <a asp-area="Admin" asp-controller="CleanRooms" asp-action="Index" class="btn btn-primary">Manage Rooms</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Sensors</h5>
+            </div>
+            <div class="card-body">
+                <p>Configure and manage sensors for monitoring clean rooms.</p>
+                <a asp-area="Admin" asp-controller="SensorInfos" asp-action="Index" class="btn btn-primary">Manage Sensors</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>View Dashboard</h5>
+            </div>
+            <div class="card-body">
+                <p>Return to the main dashboard to view monitoring data.</p>
+                <a asp-area="" asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">View Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>

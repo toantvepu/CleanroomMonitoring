@@ -1,0 +1,96 @@
+﻿@* Views/Shared/Components/SensorMap/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewComponents.SensorMapViewModel
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Sơ đồ vị trí cảm biến - @Model.CleanRoom.RoomName</h5>
+    </div>
+    <div class="card-body">
+        <div class="sensor-map position-relative" style="height: 500px; border: 1px solid #ddd; background-color: #f8f9fa;">
+            @foreach (var location in Model.SensorLocations) {
+                var x = location.ToaDoX ?? 0;
+                var y = location.ToaDoY ?? 0;
+
+                // Kiểm tra tình trạng kết nối
+                var connectionStatus = Model.ConnectionStatuses.FirstOrDefault(c => c.SensorInfoID == location.SensorInfoID);
+                var isConnected = connectionStatus?.IsConnected ?? false;
+
+                // Kiểm tra cờ cảnh báo
+                var sensorFlag = Model.SensorFlags.FirstOrDefault(f => f.SensorInfoID == location.SensorInfoID);
+                var hasWarning = sensorFlag?.HasAbnormalValue ?? false;
+
+                // Giá trị đọc mới nhất
+                Model.LatestReadings.TryGetValue(location.SensorInfoID ?? 0, out var latestReading);
+                var readingValue = latestReading?.ReadingValue?.ToString("F1") ?? "N/A";
+                var readingTime = latestReading?.ReadingTime?.ToString("HH:mm") ?? "";
+
+                var statusClass = !isConnected ? "bg-danger" :
+                hasWarning ? "bg-warning" : "bg-success";
+
+                <div class="sensor-point position-absolute"
+                     style="left: @(x)px; top: @(y)px;"
+                     data-bs-toggle="tooltip"
+                     data-bs-placement="top"
+                     title="@location.SensorInfo?.SensorName (@location.SensorInfo?.SensorType?.TypeName): @readingValue @location.SensorInfo?.SensorType?.Unit">
+                    <div class="sensor-icon @statusClass">
+                        @if (location.SensorInfo?.SensorType?.TypeName.Contains("Temperature") ?? false) {
+                            <i class="bi bi-thermometer-half"></i>
+                        }
+                        else if (location.SensorInfo?.SensorType?.TypeName.Contains("Humidity") ?? false) {
+                            <i class="bi bi-droplet-half"></i>
+                        }
+                        else if (location.SensorInfo?.SensorType?.TypeName.Contains("Pressure") ?? false) {
+                            <i class="bi bi-speedometer"></i>
+                        }
+                        else {
+                            <i class="bi bi-broadcast"></i>
+                        }
+                    </div>
+                    <div class="sensor-label">
+                        <small>@readingValue</small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-center">
+            <div class="me-3">
+                <span class="badge bg-success me-1">&nbsp;</span> Bình thường
+            </div>
+            <div class="me-3">
+                <span class="badge bg-warning me-1">&nbsp;</span> Cảnh báo
+            </div>
+            <div>
+                <span class="badge bg-danger me-1">&nbsp;</span> Ngắt kết nối
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sensor-point {
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .sensor-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .sensor-label {
+        margin-top: 2px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        padding: 0 4px;
+        font-size: 10px;
+    }
+</style>

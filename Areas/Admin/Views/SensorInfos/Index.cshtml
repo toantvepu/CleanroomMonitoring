@@ -1,0 +1,178 @@
+﻿@model IEnumerable<CleanroomMonitoring.Web.Models.SensorInfo>
+
+@{
+    ViewData["Title"] = "Sensors Management";
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Get filter data from ViewBag for select lists
+    var sensorTypes = (SelectList)ViewBag.SensorTypes;
+    var phases = (SelectList)ViewBag.Phases;
+}
+
+<div class="container-fluid">
+    <h2>Sensors Management</h2>
+
+    @if (TempData["SuccessMessage"] != null) {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null) {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">Filter Options</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get" id="filterForm">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="searchName" class="form-label">Sensor Name</label>
+                        <input type="text" class="form-control" id="searchName" name="searchName"
+                               value="@ViewBag.CurrentSearchName" placeholder="Search by name...">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="searchRoom" class="form-label">Clean Room</label>
+                        <input type="text" class="form-control" id="searchRoom" name="searchRoom"
+                               value="@ViewBag.CurrentSearchRoom" placeholder="Search by room...">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="sensorType" class="form-label">Sensor Type</label>
+                        <select class="form-select" id="sensorType" name="sensorType">
+                            <option value="">All Types</option>
+                            @foreach (var type in new List<string> { "Pressure", "Humidity", "Temperature" }) {
+                                if (type == ViewBag.CurrentSensorType) {
+                                    <option value="@type" selected>@type</option>
+                                }
+                                else {
+                                    <option value="@type">@type</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="phase" class="form-label">Phase</label>
+                        <select class="form-select" id="phase" name="phase">
+                            <option value="">All Phases</option>
+                            @foreach (var phase in new List<string> { "1FP1", "2FP1", "2FP2", "3FP1", "3FP2" }) {
+                                if (phase == ViewBag.CurrentPhase) {
+                                    <option value="@phase" selected>@phase</option>
+                                }
+                                else {
+                                    <option value="@phase">@phase</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end mb-3">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-filter"></i> Apply Filters
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Create New Sensor
+        </a>
+        <div>
+            <span class="badge bg-info">Total Sensors: @Model.Count()</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Sensors List</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="sensorsTable">
+                    <thead>
+                        <tr>
+                            <th>Sensor Name</th>
+                            <th>Clean Room</th>
+                            <th>Sensor Type</th>
+                            <th>IP Address</th>
+                            <th>Phase</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr>
+                                <td>@item.SensorName</td>
+                                <td>@(item.CleanRoom?.RoomName ?? "Not Assigned")</td>
+                                <td>@(item.SensorType?.TypeName ?? "Unknown")</td>
+                                <td>@(string.IsNullOrEmpty(item.IpAddress) ? "N/A" : item.IpAddress)</td>
+                                <td>@(string.IsNullOrEmpty(item.Phase) ? "N/A" : item.Phase)</td>
+                                <td>
+                                    @if (item.IsActive == true) {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.SensorInfoID" class="btn btn-info btn-sm">
+                                            <i class="fa fa-pencil"></i> Edit
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.SensorInfoID" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-info-circle"></i> Details
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.SensorInfoID" class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable with server-side processing disabled
+            // since we're handling filtering via our custom filters
+            $('#sensorsTable').DataTable({
+                "responsive": true,
+                "ordering": true,
+                "paging": true,
+                "searching": false, // Disable built-in search as we have custom search
+                "info": true,
+                "language": {
+                    "emptyTable": "No sensors found matching your criteria"
+                }
+            });
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Debug to console
+            console.log("Current sensor type:", $("#sensorType").val());
+            console.log("Current phase:", $("#phase").val());
+        });
+    </script>
+}

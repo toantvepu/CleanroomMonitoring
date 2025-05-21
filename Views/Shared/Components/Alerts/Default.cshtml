@@ -1,0 +1,52 @@
+﻿@* Views/Shared/Components/Alerts/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewComponents.AlertsViewModel
+
+<div class="card">
+    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Cảnh báo</h5>
+        @if (Model.UnacknowledgedAlerts > 0) {
+            <span class="badge bg-warning text-dark">@Model.UnacknowledgedAlerts chưa xử lý</span>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Alerts.Any()) {
+            <div class="p-3 text-center text-muted">
+                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                <p class="mt-2">Không có cảnh báo nào</p>
+            </div>
+        }
+        else {
+            <div class="list-group list-group-flush">
+                @foreach (var alert in Model.Alerts) {
+                    <div class="list-group-item @(!alert.IsHandled ? "alert-warning" : "")">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">
+                                    @alert.AlertType - @alert.SensorInfo.SensorName
+                                    <small>(@alert.SensorInfo.SensorType.TypeName)</small>
+                                </h6>
+                                <p class="mb-1 small">@alert.AlertMessage</p>
+                                <small class="text-muted">
+                                    @alert.AlertTime.Value.ToString("dd/MM/yyyy HH:mm:ss") -
+                                    @alert.SensorInfo.CleanRoom.RoomName
+                                </small>
+                            </div>
+                            <div>
+                                @if (!alert.IsHandled) {
+                                    <button class="btn btn-sm btn-outline-primary btn-acknowledge"
+                                            data-alert-id="@alert.AlertID">
+                                        &rarr;
+                                    </button>
+                                }
+                                else {
+                                    <span class="badge bg-success">Đã xử lý</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+</div>

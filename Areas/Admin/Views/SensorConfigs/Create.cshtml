@@ -1,0 +1,132 @@
+﻿@model CleanroomMonitoring.Web.Models.SensorConfig
+
+@{
+    ViewData["Title"] = "Create Sensor Configuration";
+}
+
+<div class="container-fluid">
+    <h2>Create Sensor Configuration</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">New Configuration for @ViewBag.SensorInfo.SensorName</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="SensorInfoID" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="MinValidValue" class="control-label">Minimum Valid Value</label>
+                                    <input asp-for="MinValidValue" class="form-control" />
+                                    <span asp-validation-for="MinValidValue" class="text-danger"></span>
+                                    <small class="form-text text-muted">Lowest acceptable reading value</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="MaxValidValue" class="control-label">Maximum Valid Value</label>
+                                    <input asp-for="MaxValidValue" class="form-control" />
+                                    <span asp-validation-for="MaxValidValue" class="text-danger"></span>
+                                    <small class="form-text text-muted">Highest acceptable reading value</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LowAlertThreshold" class="control-label">Low Alert Threshold</label>
+                                    <input asp-for="LowAlertThreshold" class="form-control" />
+                                    <span asp-validation-for="LowAlertThreshold" class="text-danger"></span>
+                                    <small class="form-text text-muted">Value that triggers low alerts</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="HighAlertThreshold" class="control-label">High Alert Threshold</label>
+                                    <input asp-for="HighAlertThreshold" class="form-control" />
+                                    <span asp-validation-for="HighAlertThreshold" class="text-danger"></span>
+                                    <small class="form-text text-muted">Value that triggers high alerts</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ScanInterval" class="control-label">Scan Interval (seconds)</label>
+                                    <input asp-for="ScanInterval" class="form-control" />
+                                    <span asp-validation-for="ScanInterval" class="text-danger"></span>
+                                    <small class="form-text text-muted">How often to read sensor data (in seconds)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mt-4">
+                                    <div class="form-check">
+                                        <input asp-for="IsMonitored" class="form-check-input" />
+                                        <label asp-for="IsMonitored" class="form-check-label">Monitor this sensor</label>
+                                    </div>
+                                    <div class="form-check mt-3">
+                                        <input asp-for="RequestConvertData" class="form-check-input" />
+                                        <label asp-for="RequestConvertData" class="form-check-label">Convert sensor data</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> Save Configuration
+                            </button>
+                            <a asp-area="Admin" asp-controller="SensorInfos" asp-action="Details" asp-route-id="@Model.SensorInfoID" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left"></i> Back to Sensor
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sensor Information</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Sensor Name</dt>
+                        <dd class="col-sm-8">@ViewBag.SensorInfo.SensorName</dd>
+
+                        <dt class="col-sm-4">Sensor Type</dt>
+                        <dd class="col-sm-8">@(ViewBag.SensorInfo.SensorType?.TypeName ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Measurement Unit</dt>
+                        <dd class="col-sm-8">@(ViewBag.SensorInfo.SensorType?.Unit ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Room</dt>
+                        <dd class="col-sm-8">@(ViewBag.SensorInfo.CleanRoom?.RoomName ?? "Not assigned")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

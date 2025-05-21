@@ -1,0 +1,204 @@
+﻿@model List<RoomSensorOverlayGroupViewModel>
+<style>
+    .overlay-box {
+        position: absolute;
+        background: rgb(21 143 37 / 70%);
+        color: #fff;
+        padding: 4px 4px;
+        border-radius: 6px;
+        font-size: 0.75em;
+        text-align: center;
+        min-width: 50px;
+        z-index: 30;
+        transform: translate(-50%, -120%);
+    }
+
+        .overlay-box.top {
+            transform: translate(-50%, -130%);
+        }
+
+        .overlay-box.right {
+            transform: translate(20%, -50%);
+        }
+
+        .overlay-box.left {
+            transform: translate(-120%, -50%);
+        }
+
+        .overlay-box.bottom {
+            transform: translate(-50%, 60%);
+        }
+
+    .arrow {
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+        .arrow.top {
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgb(21 143 37 / 70%);
+        }
+
+        .arrow.right {
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid rgb(21 143 37 / 70%);
+        }
+
+        .arrow.left {
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid rgb(21 143 37 / 70%);
+        }
+
+        .arrow.bottom {
+            left: 50%;
+            bottom: 100%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid rgb(21 143 37 / 70%);
+        }
+
+    .arrow-line {
+        position: absolute;
+        background: rgb(21 143 37 / 70%);
+        z-index: 25;
+    }
+
+        .arrow-line.top {
+            left: 50%;
+            top: 100%;
+            width: 0px;
+            height: 15px;
+            transform: translateX(-50%);
+        }
+
+        .arrow-line.bottom {
+            left: 50%;
+            bottom: 100%;
+            width: 1px;
+            height: 50%;
+            transform: translateX(-50%);
+        }
+
+        .arrow-line.right {
+            left: -15px;
+            top: 50%;
+            width: 15px;
+            height: 0px;
+            transform: translateY(-50%);
+        }
+
+        .arrow-line.left {
+            right: -15px;
+            top: 50%;
+            width: 15px;
+            height: 0px;
+            transform: translateY(-50%);
+        }
+
+    .room-info {
+        display: none;
+    }
+
+    .show-room-info .room-info {
+        display: block;
+    }
+            </style>
+
+@{
+    var imageFile = Model.FirstOrDefault()?.ImageFile ?? "1F.png";
+    var width = "1000px";
+    var height = "864px";
+    switch (imageFile)
+    {
+        case "1F.png":
+            width = "1000px";
+            height = "864px";
+            break;
+        case "2F.png":
+            width = "1102px";
+            height = "950px";
+            break;
+
+        case "3F.png":
+            width = "1103px";
+            height = "944px";
+            break;
+        default:
+            break;
+    }
+}
+  Latest data: @ViewData["ReadingTime"]
+<div style="position:relative;">
+    <img src="~/img/@imageFile" style="width:@width; height:@height;" />
+
+    @foreach (var item in Model) {
+        // Lấy sensor chính (ví dụ: nhiệt độ) để xác định màu
+        var mainSensor = item.Sensors.FirstOrDefault(); // hoặc chọn theo loại sensor bạn muốn
+        var isValid = mainSensor?.IsValid ?? false;
+        var value = mainSensor?.Value ?? 0;
+        var color = (isValid && value != 0) ? "#2196f3" : "#e53935"; // xanh hoặc đỏ
+        var direction = item.OverlayDirection ?? "top"; // Mặc định là top
+
+
+        <!-- Chấm tròn xanh blue -->
+        <div style="
+            position:absolute;
+            left:@($"{item.X}px");
+            top:@($"{item.Y}px");
+            width:15px;
+            height:15px;
+            background:#2196f3;
+            border-radius:50%;
+            border:2px solid #fff;
+            box-shadow:0 0 6px #2196f3;
+            transform: translate(-50%, -50%);
+            z-index:20;">
+        </div>
+      
+
+        <!-- Overlay thông tin sensor -->
+        <div class="overlay-box @direction"
+             style="left:@($"{item.X}px"); top:@($"{item.Y}px");">
+            <div class="arrow-line @direction"></div>
+            <div class="arrow @direction"></div>
+            <div class="room-info">
+                <div class="bg-info">
+                    <a href="@Url.Action("Index","CleanRooms", new { roomId = item.RoomID })" style="color:white;font-weight:bold;" target="_blank">
+                        @item.RoomName @item.Comment
+                    </a>
+                </div>
+               
+            </div>
+            @foreach (var s in item.Sensors) {
+                
+                <a href="@Url.Action("Index","CleanRooms", new { roomId = item.RoomID })" style="text-decoration:none;color:white;font-weight:bold;" target="_blank">
+                    <div>@(s.Value?.ToString("0.0") ?? "--") @s.Unit</div>
+                   
+                </a>
+              @*   <div>@s.LocationName</div> *@
+             
+            }
+        </div>
+        @* @item.RoomName @item.Comment *@
+        
+    }
+</div>
+
+@section Scripts {
+@* Sự kiện chọn checkbox để hiển thị đầy đủ phòng trên map *@
+
+}

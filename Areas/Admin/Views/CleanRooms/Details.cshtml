@@ -1,0 +1,114 @@
+﻿@model CleanroomMonitoring.Web.Models.CleanRoom
+
+@{
+    ViewData["Title"] = "Clean Room Details";
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+  
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@Model.RoomName</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Room Name:</dt>
+                        <dd class="col-sm-8">@Model.RoomName</dd>
+
+                        <dt class="col-sm-4">Factory:</dt>
+                        <dd class="col-sm-8">@(Model.Factory?.FactoryName ?? "Not Assigned")</dd>
+
+                        <dt class="col-sm-4">Area:</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.Area) ? "N/A" : Model.Area)</dd>
+
+                        <dt class="col-sm-4">Clean Room Class:</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.CleanRoomClass) ? "N/A" : Model.CleanRoomClass)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Created Date:</dt>
+                        <dd class="col-sm-8">@(Model.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Last Modified:</dt>
+                        <dd class="col-sm-8">@(Model.LastModifiedDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Description:</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.Description) ? "N/A" : Model.Description)</dd>
+
+                        <dt class="col-sm-4">Comments:</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.COMMENT) ? "N/A" : Model.COMMENT)</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row justify-content-between">
+                <div class="col-auto">
+                    <div class="p-3">
+                        <h4 class="mt-4">Sensors in this room (@(Model.SensorInfos?.Count() ?? 0))</h4>
+                    </div>
+                   
+                </div>
+                @* <div class="col-auto text-end">
+                    <div class="p-3"> 
+                    <a asp-action="CreateSensor" class="btn btn-primary">Create New Sensor</a>
+                    </div>
+                </div>    *@
+            </div>
+            
+            @if (Model.SensorInfos != null && Model.SensorInfos.Any()) {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sensor Name</th>
+                                <th>Sensor Type</th>
+                                <th>Status</th>
+                                <th>IP Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sensor in Model.SensorInfos) {
+                                <tr>
+                                    <td>@sensor.SensorName</td>
+                                    <td>@(sensor.SensorType?.TypeName ?? "Unknown")</td>
+                                    <td>
+                                        @if (sensor.IsActive == true) {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(sensor.IpAddress) ? "N/A" : sensor.IpAddress)</td>
+                                    <td>
+                                        <a asp-area="Admin" asp-controller="SensorInfos" asp-action="Details" asp-route-id="@sensor.SensorInfoID" class="btn btn-info btn-sm">
+                                            <i class="fa fa-info-circle"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else {
+                <div class="alert alert-info">
+                    No sensors have been assigned to this clean room yet.
+                </div>
+            }
+
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.RoomID" class="btn btn-primary">
+                    <i class="fa fa-pencil"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

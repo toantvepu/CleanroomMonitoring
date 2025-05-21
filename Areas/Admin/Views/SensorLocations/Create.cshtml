@@ -1,0 +1,163 @@
+﻿@model CleanroomMonitoring.Web.Models.SensorLocation
+
+@{
+    ViewData["Title"] = "Create Sensor Location";
+}
+
+<div class="container-fluid">
+    <h2>Create Sensor Location</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">New Location for @ViewBag.SensorInfo.SensorName</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="SensorInfoID" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="LocationName" class="control-label">Location Name</label>
+                                    <input asp-for="LocationName" class="form-control" />
+                                    <span asp-validation-for="LocationName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="XCoordinate" class="control-label">X Coordinate</label>
+                                    <input asp-for="XCoordinate" class="form-control" />
+                                    <span asp-validation-for="XCoordinate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="YCoordinate" class="control-label">Y Coordinate</label>
+                                    <input asp-for="YCoordinate" class="form-control" />
+                                    <span asp-validation-for="YCoordinate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="ZCoordinate" class="control-label">Z Coordinate</label>
+                                    <input asp-for="ZCoordinate" class="form-control" />
+                                    <span asp-validation-for="ZCoordinate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="ToaDoX" class="control-label">Map X Position</label>
+                                    <input asp-for="ToaDoX" class="form-control" />
+                                    <span asp-validation-for="ToaDoX" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="ToaDoY" class="control-label">Map Y Position</label>
+                                    <input asp-for="ToaDoY" class="form-control" />
+                                    <span asp-validation-for="ToaDoY" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="OverlayDirection" class="control-label">Direction</label>
+                                    <select asp-for="OverlayDirection" class="form-control">
+                                       @*  <option value="N">North (N)</option>
+                                        <option value="E">East (E)</option>
+                                        <option value="S">South (S)</option>
+                                        <option value="W">West (W)</option>
+                                        <option value="NE">Northeast (NE)</option>
+                                        <option value="SE">Southeast (SE)</option>
+                                        <option value="SW">Southwest (SW)</option>
+                                        <option value="NW">Northwest (NW)</option> *@  
+                                        
+                                        <option value="top">top</option>
+                                        <option value="bottom">bottom</option>
+                                        <option value="left">left</option>
+                                        <option value="right">right </option> 
+                                    </select>
+                                    <span asp-validation-for="OverlayDirection" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label">Active Location</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="COMMENT" class="control-label">Comments</label>
+                            <textarea asp-for="COMMENT" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="COMMENT" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> Save Location
+                            </button>
+                            <a asp-area="Admin" asp-controller="SensorInfos" asp-action="Details" asp-route-id="@Model.SensorInfoID" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left"></i> Back to Sensor
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sensor Information</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Sensor Name</dt>
+                        <dd class="col-sm-8">@ViewBag.SensorInfo.SensorName</dd>
+
+                        <dt class="col-sm-4">Sensor Type</dt>
+                        <dd class="col-sm-8">@(ViewBag.SensorInfo.SensorType?.TypeName ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Room</dt>
+                        <dd class="col-sm-8">@(ViewBag.SensorInfo.CleanRoom?.RoomName ?? "Not assigned")</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            @if (ViewBag.SensorInfo.IsActive) {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

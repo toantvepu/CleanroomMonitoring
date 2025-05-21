@@ -1,0 +1,236 @@
+﻿@model CleanroomMonitoring.Web.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Clean Room Monitoring Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-6">Clean Room Monitoring Dashboard </h1>
+            <p class="text-muted">Real-time monitoring of clean room environmental conditions.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Clean Rooms</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach (var room in Model.CleanRooms) {
+                        <a href="@Url.Action("Index", new { roomId = room.RoomID })"
+                           class="list-group-item list-group-item-action @(Model.CurrentRoom?.RoomID == room.RoomID ? "active" : "")">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">@room.RoomName</h6>
+                                @if (room.HasAlerts) {
+                                    <span class="badge bg-danger">Alert</span>
+                                }
+                            </div>
+                            <small>Class: @room.CleanRoomClass | @room.SensorCount sensors</small>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            @if (Model.CurrentRoom != null) {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">@Model.CurrentRoom.RoomName Overview</h5>
+                        <small class="text-muted">Class: @Model.CurrentRoom.CleanRoomClass | Area: @Model.CurrentRoom.Area</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var sensor in Model.CurrentRoom.Sensors) {
+                                var status = Model.SensorStatuses.ContainsKey(sensor.SensorInfoID) ?
+                                Model.SensorStatuses[sensor.SensorInfoID].Status : "Unknown";
+
+                                var statusClass = status == "Normal" ? "success" :
+                                (status == "Warning" ? "warning" : "danger");
+
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 border-@statusClass">
+                                        <div class="card-header bg-@statusClass bg-opacity-25">
+                                            <h6 class="card-title mb-0">@sensor.SensorName
+                                               
+                                            </h6>
+                                            <small>
+                                                @sensor.SensorTypeName  
+                                                <a asp-controller="Sensors2" asp-action="Index" asp-route-id="@sensor.SensorInfoID" class="text-black ms-2" target="_blank">
+                                                    Report
+                                                </a>
+                                            </small>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <h3 class="display-4">@sensor.LastReading</h3>
+                                            <p class="mb-0">@sensor.Unit</p>
+                                            <small class="text-muted">
+                                                Last updated: @(sensor.LastReadingTime?.ToString("HH:mm:ss") ?? "N/A")
+                                            </small>
+                                        </div>
+                                        <div class="card-footer bg-transparent border-top-0">
+                                            <div class="d-flex justify-content-between">
+                                                <small>Min: @Model.SensorStatuses[sensor.SensorInfoID].MinValue</small>
+                                                <small>Avg: @Model.SensorStatuses[sensor.SensorInfoID].AverageValue.ToString()</small>
+                                                <small>Max: @Model.SensorStatuses[sensor.SensorInfoID].MaxValue</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.CurrentRoom.Sensors.Any()) {
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Historical Data (Last 24 Hours)</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="sensorTabs" role="tablist">
+                                @foreach (var sensor in Model.CurrentRoom.Sensors.Take(5)) {
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(sensor == Model.CurrentRoom.Sensors.First() ? "active" : "")"
+                                                id="sensor-@sensor.SensorInfoID-tab"
+                                                data-bs-toggle="tab"
+                                                data-bs-target="#sensor-@sensor.SensorInfoID-chart"
+                                                type="button"
+                                                role="tab">
+                                            @sensor.SensorName
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="tab-content mt-3" id="sensorTabContent">
+                                @foreach (var sensor in Model.CurrentRoom.Sensors.Take(5)) {
+                                    <div class="tab-pane fade @(sensor == Model.CurrentRoom.Sensors.First() ? "show active" : "")"
+                                         id="sensor-@sensor.SensorInfoID-chart"
+                                         role="tabpanel">
+                                        <div class="chart-container" style="position: relative; height:300px;">
+                                            <canvas id="chart-@sensor.SensorInfoID"
+                                                    data-sensor-id="@sensor.SensorInfoID"
+                                                    data-sensor-name="@sensor.SensorName"
+                                                    data-sensor-unit="@sensor.Unit"></canvas>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else {
+                <div class="alert alert-info">
+                    Please select a clean room from the list to view its monitoring dashboard.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Store chart objects
+        const charts = {};
+
+        $(document).ready(function() {
+            // Initialize charts
+            initializeCharts();
+
+            // Poll for updates every 60 seconds
+            setInterval(updateSensorData, 1160000);
+        });
+
+        function initializeCharts() {
+            $('canvas[id^="chart-"]').each(function() {
+                const canvas = $(this);
+                const sensorId = canvas.data('sensor-id');
+                const sensorName = canvas.data('sensor-name');
+                const sensorUnit = canvas.data('sensor-unit');
+
+                // Get chart data from the model
+                const chartData = @Html.Raw(Json.Serialize(Model.ChartData));
+                const sensorData = chartData[sensorId] || [];
+
+                const labels = sensorData.map(d => new Date(d.timestamp).toLocaleTimeString());
+                const values = sensorData.map(d => d.value);
+
+                // Create chart
+                const ctx = canvas[0].getContext('2d');
+                charts[sensorId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${sensorName} (${sensorUnit})`,
+                            data: values,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            pointRadius: 1,
+                            tension: 0.3,
+                            fill: true,
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: sensorUnit
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateSensorData() {
+            const roomId = @(Model.CurrentRoom?.RoomID ?? 0);
+            if (roomId > 0) {
+                $.ajax({
+                    url: '@Url.Action("GetLatestReadings")',
+                    data: { roomId: roomId },
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // Update sensor values on dashboard
+                        data.forEach(function(sensor) {
+                            const sensorElement = $(`#sensor-${sensor.sensorID}-value`);
+                            if (sensorElement.length) {
+                                sensorElement.text(sensor.value);
+                                $(`#sensor-${sensor.sensorID}-time`).text(
+                                    `Last updated: ${new Date(sensor.timestamp).toLocaleTimeString()}`
+                                );
+
+                                const statusClass = sensor.isValid ? 'success' : 'danger';
+                                $(`#sensor-${sensor.sensorID}-card`)
+                                    .removeClass('border-success border-warning border-danger')
+                                    .addClass(`border-${statusClass}`);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    </script>
+}

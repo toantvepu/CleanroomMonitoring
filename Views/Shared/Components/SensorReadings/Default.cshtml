@@ -1,0 +1,81 @@
+﻿@* Views/Shared/Components/SensorReadings/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewModels.SensorReadingsViewModel
+
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Thông số đo lường</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="row g-0">
+            @foreach (var sensorData in Model.SensorReadings.Take(3)) {
+                <div class="col-md-4 border-end p-3">
+                    <h6>@sensorData.SensorInfo.SensorType.TypeName</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="display-5">
+                            @(sensorData.LatestReading?.ReadingValue?.ToString("F1") ?? "N/A")
+                        </span>
+                        <span class="text-muted">@sensorData.SensorInfo.SensorType.Unit</span>
+                    </div>
+                    <div class="small text-muted">
+                        @(sensorData.LatestReading?.ReadingTime?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-4 text-center">
+                            <div>Min</div>
+                            <strong>@sensorData.MinValue.ToString("F1")</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div>Avg</div>
+                            <strong>@sensorData.AvgValue.ToString("F1")</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div>Max</div>
+                            <strong>@sensorData.MaxValue.ToString("F1")</strong>
+                        </div>
+                    </div>
+
+                    @if (sensorData.SensorConfig != null) {
+                        <div class="progress mt-3" style="height: 5px;">
+                            @{
+                                var min = sensorData.SensorConfig.MinValidValue ?? 0;
+                                var max = sensorData.SensorConfig.MaxValidValue ?? 100;
+                                var low = sensorData.SensorConfig.LowAlertThreshold ?? min;
+                                var high = sensorData.SensorConfig.HighAlertThreshold ?? max;
+                                var current = sensorData.LatestReading?.ReadingValue ?? 0;
+
+                                var range = max - min;
+                                var lowPct = (low - min) / range * 100;
+                                var highPct = (high - min) / range * 100;
+                                var currentPct = (current - min) / range * 100;
+
+                                // Ensure percentages are within valid range
+                                lowPct = Math.Max(0, Math.Min(100, lowPct));
+                                highPct = Math.Max(0, Math.Min(100, highPct));
+                                currentPct = Math.Max(0, Math.Min(100, currentPct));
+                            }
+
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 style="width: @lowPct%;" aria-valuenow="@lowPct"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: @(highPct - lowPct)%;" aria-valuenow="@(highPct - lowPct)"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 style="width: @(100 - highPct)%;" aria-valuenow="@(100 - highPct)"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="position-relative mt-1">
+                            <div class="position-absolute" style="left: @currentPct%; transform: translateX(-50%);">
+                                <i class="bi bi-caret-up-fill text-primary"></i>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        <a href="/SensorReadings" class="btn btn-sm btn-outline-info">Xem tất cả thông số</a>
+    </div>
+</div>

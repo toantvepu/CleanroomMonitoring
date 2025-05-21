@@ -1,0 +1,35 @@
+﻿@model List<CleanroomMonitoring.Web.ViewModels.AlertViewModel>
+
+<div class="list-group">
+    @if (Model.Any()) {
+        foreach (var alert in Model) {
+            <a href="@Url.Action("Details", "Alerts", new { id = alert.AlertID })"
+               class="list-group-item list-group-item-action @(alert.AlertType == "Critical" ? "list-group-item-danger" : "list-group-item-warning") @(alert.IsResolved ? "opacity-50" : "")">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">@alert.AlertMessage</h6>
+                    <small>@alert.AlertTime?.ToString("HH:mm")</small>
+                </div>
+                <p class="mb-1">
+                    <span class="badge bg-primary">@alert.RoomName</span>
+                    <span class="badge bg-secondary">@alert.SensorName</span>
+                    <span class="badge bg-info">@alert.ReadingValue</span>
+                </p>
+                @if (alert.IsResolved) {
+                    <span class="badge bg-success">Resolved</span>
+                }
+                else {
+                    <span class="badge bg-danger">Active</span>
+                }
+            </a>
+        }
+    }
+    else {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill"></i> No recent alerts
+        </div>
+    }
+</div>
+
+<div class="text-center mt-3">
+    <a href="#" class="btn btn-sm btn-primary">View All Alerts</a>
+</div>

@@ -1,0 +1,75 @@
+﻿@using CleanroomMonitoring.Web.ViewModels
+@model KeyValuePair<int, SensorStatistics>
+@{
+    var sensorViewModel = ViewData["SensorViewModel"] as SensorViewModel;
+    var stats = Model.Value;
+    var sensorId = Model.Key;
+}
+
+<div class="card h-100">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fas fa-chart-bar me-1"></i>
+            @sensorViewModel?.SensorName Statistics
+        </div>
+        <a href="@Url.Action("SensorDetail", "Analytics", new { sensorId = sensorId })" class="btn btn-sm btn-outline-primary">
+            View Details
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="stat-card text-center p-2 rounded bg-light">
+                    <div class="value-large text-primary">@stats.MinValue.ToString("F1")</div>
+                    <div class="label-small text-muted">Min @sensorViewModel?.Unit</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center p-2 rounded bg-light">
+                    <div class="value-large text-primary">@stats.MaxValue.ToString("F1")</div>
+                    <div class="label-small text-muted">Max @sensorViewModel?.Unit</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center p-2 rounded bg-light">
+                    <div class="value-large text-primary">@stats.AvgValue.ToString("F1")</div>
+                    <div class="label-small text-muted">Avg @sensorViewModel?.Unit</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="progress mb-1" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar"
+                         style="width: @(stats.TotalReadings > 0 ? (100 * stats.ValidReadings / stats.TotalReadings).ToString("F0") : "0")%">
+                        @stats.ValidReadings Valid
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="progress mb-1" style="height: 20px;">
+                    <div class="progress-bar bg-danger" role="progressbar"
+                         style="width: @(stats.TotalReadings > 0 ? (100 * stats.InvalidReadings / stats.TotalReadings).ToString("F0") : "0")%">
+                        @stats.InvalidReadings Invalid
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <div class="d-flex justify-content-between">
+                <span>Std Deviation:</span>
+                <span>@stats.StdDeviation.ToString("F2") @sensorViewModel?.Unit</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Total Readings:</span>
+                <span>@stats.TotalReadings</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Alert Events:</span>
+                <span class="@(stats.AlertCount > 0 ? "text-danger" : "text-success")">@stats.AlertCount</span>
+            </div>
+        </div>
+    </div>
+</div>

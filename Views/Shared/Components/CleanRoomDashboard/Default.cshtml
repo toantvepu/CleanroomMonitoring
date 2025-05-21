@@ -1,0 +1,111 @@
+﻿ @model List<CleanRoomDashboardViewModel>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Bảng theo dõi phòng sạch (24 giờ gần nhất)</h5>
+        <span>Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th rowspan="2">Phòng</th>
+                        <th rowspan="2">Khu vực</th>
+                        <th rowspan="2">Cấp độ</th>
+                        <th colspan="5" class="text-center">Nhiệt độ (°C)</th>
+                        <th colspan="5" class="text-center">Độ ẩm (%)</th>
+                        <th colspan="5" class="text-center">Áp suất (Pa)</th>
+                    </tr>
+                    <tr>
+                        <th>Hiện tại</th>
+                        <th>Cao nhất</th>
+                        <th>Thấp nhất</th>
+                        <th>Trung bình</th>
+                        <th>Lỗi</th>
+
+                        <th>Hiện tại</th>
+                        <th>Cao nhất</th>
+                        <th>Thấp nhất</th>
+                        <th>Trung bình</th>
+                        <th>Lỗi</th>
+
+                        <th>Hiện tại</th>
+                        <th>Cao nhất</th>
+                        <th>Thấp nhất</th>
+                        <th>Trung bình</th>
+                        <th>Lỗi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model) {
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("Details", "CleanRooms", new { id = room.RoomID })">
+                                    @room.RoomName
+                                </a>
+                            </td>
+                            <td>@room.Area</td>
+                            <td>@room.CleanRoomClass</td>
+
+                            <!-- Nhiệt độ -->
+                            <td class="@(room.CurrentTemperature > 25 ? "bg-danger text-white" :
+                                     room.CurrentTemperature < 20 ? "bg-info text-white" : "")">
+                                @(room.CurrentTemperature?.ToString("F1") ?? "-")
+                            </td>
+                            <td>@(room.MaxTemperature?.ToString("F1") ?? "-")</td>
+                            <td>@(room.MinTemperature?.ToString("F1") ?? "-")</td>
+                            <td>@(room.AvgTemperature?.ToString("F1") ?? "-")</td>
+                            <td class="@(room.InvalidTemperatureCount > 0 ? "bg-warning" : "")">
+                                @room.InvalidTemperatureCount
+                            </td>
+
+                            <!-- Độ ẩm -->
+                            <td class="@(room.CurrentHumidity > 65 ? "bg-danger text-white" :
+                                     room.CurrentHumidity < 30 ? "bg-warning" : "")">
+                                @(room.CurrentHumidity?.ToString("F1") ?? "-")
+                            </td>
+                            <td>@(room.MaxHumidity?.ToString("F1") ?? "-")</td>
+                            <td>@(room.MinHumidity?.ToString("F1") ?? "-")</td>
+                            <td>@(room.AvgHumidity?.ToString("F1") ?? "-")</td>
+                            <td class="@(room.InvalidHumidityCount > 0 ? "bg-warning" : "")">
+                                @room.InvalidHumidityCount
+                            </td>
+
+                            <!-- Áp suất -->
+                            <td class="@(room.CurrentPressure < 5 ? "bg-danger text-white" : "")">
+                                @(room.CurrentPressure?.ToString("F1") ?? "-")
+                            </td>
+                            <td>@(room.MaxPressure?.ToString("F1") ?? "-")</td>
+                            <td>@(room.MinPressure?.ToString("F1") ?? "-")</td>
+                            <td>@(room.AvgPressure?.ToString("F1") ?? "-")</td>
+                            <td class="@(room.InvalidPressureCount > 0 ? "bg-warning" : "")">
+                                @room.InvalidPressureCount
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="d-flex justify-content-between">
+            <span>Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</span>
+            <span><span class="bg-warning px-2">■</span> Có dữ liệu không hợp lệ</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075);
+    }
+</style>

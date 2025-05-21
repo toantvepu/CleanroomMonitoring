@@ -1,0 +1,76 @@
+﻿@* Views/Shared/Components/SensorHealth/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewComponents.CleanroomSummaryViewModel
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Tổng quan phòng sạch</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Nhà máy</th>
+                        <th>Cấp độ</th>
+                        <th>Sensor</th>
+                        <th>Nhiệt độ</th>
+                        <th>Độ ẩm</th>
+                        <th>Áp suất</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model.CleanRooms) {
+                        var healthStatus = room.ActiveAlerts > 0 ? "warning" :
+                        room.DisconnectedSensors > 0 ? "danger" : "success";
+
+                        var healthText = room.ActiveAlerts > 0 ? "Có cảnh báo" :
+                        room.DisconnectedSensors > 0 ? "Có lỗi kết nối" : "Bình thường";
+
+                        <tr>
+                            <td>
+                                <a asp-controller="CleanRooms" asp-action="Index" asp-route-roomId="@room.CleanRoom.RoomID" target="_blank">
+                                    @room.CleanRoom.RoomName
+                                </a>
+                                
+                            </td>
+                            <td>@room.CleanRoom.Factory?.FactoryName</td>
+                            <td>@room.CleanRoom.CleanRoomClass</td>
+                            <td>
+                                <span class="text-success">@room.ConnectedSensors</span>/<span class="text-danger">@room.DisconnectedSensors</span>
+                            </td>
+                            <td>
+                                @{
+                                    room.LatestReadings.TryGetValue("Temperature", out var temp);
+                                    @(temp?.ToString("F1") ?? "N/A")
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    room.LatestReadings.TryGetValue("Humidity", out var humidity);
+                                    @(humidity?.ToString("F1") ?? "N/A")
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    room.LatestReadings.TryGetValue("Pressure", out var pressure);
+                                    @(pressure?.ToString("F1") ?? "N/A")
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@healthStatus">@healthText</span>
+                                @if (room.ActiveAlerts > 0) {
+                                    <span class="badge bg-danger ms-1">@room.ActiveAlerts</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        
+    </div>
+</div>

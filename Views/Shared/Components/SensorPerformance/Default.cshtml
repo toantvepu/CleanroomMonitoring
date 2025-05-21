@@ -1,0 +1,53 @@
+﻿@model List<CleanroomMonitoring.Web.ViewComponents.SensorPerformanceViewModel>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Sensor</th>
+                <th>Type</th>
+                <th>Room</th>
+                <th>Last Reading</th>
+                <th>Performance</th>
+                <th>View more</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sensor in Model) {
+                <tr>
+                    <td>
+                        @sensor.SensorName
+                       
+                    </td>
+                    <td>@sensor.SensorType</td>
+                    <td>@sensor.RoomName</td>
+                    <td>
+                        @if (sensor.LastReading.HasValue) {
+                            <div>@sensor.LastReading.Value.ToString("0.0")</div>
+                            <small class="text-muted">@(sensor.LastReadingTime?.ToString("HH:mm") ?? "--")</small>
+                        }
+                        else {
+                            <span class="text-muted">No data</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                <div class="progress-bar bg-@sensor.GetPerformanceClass()" role="progressbar"
+                                     style="width: @sensor.Performance%;"
+                                     aria-valuenow="@sensor.Performance"
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="small">@sensor.Performance.ToString("0.0")%</div>
+                        </div>
+                    </td>
+                    <td>
+                        <a asp-controller="Sensors2" asp-action="Index" asp-route-id="@sensor.SensorID" class="text-black ms-2" target="_blank">
+                            View more
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

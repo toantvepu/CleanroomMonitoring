@@ -1,0 +1,25 @@
+﻿@model CleanroomMonitoring.Web.ViewComponents.AlertsSummaryViewModel
+
+<div class="card border-left-warning shadow h-100 py-2">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                    <a asp-controller="Alerts" asp-action="Index">
+                        Alerts
+                      </a>
+                   
+                </div>
+                <div class="h2 mb-0 font-weight-bold text-gray-800">@Model.ActiveAlerts Active</div>
+                <div class="mt-2 small">
+                    <div><span class="text-danger">@Model.CriticalAlerts Critical</span></div>
+                    <div>@Model.TotalAlerts this month</div>
+                    <div>@Model.AlertsToday New Today</div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+            </div>
+        </div>
+    </div>
+</div>

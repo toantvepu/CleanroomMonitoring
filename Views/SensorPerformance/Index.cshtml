@@ -1,0 +1,26 @@
+﻿<h2>System Health</h2>
+<div class="col-xl-3 col-md-6 mb-4">
+   @*  @await Component.InvokeAsync("SystemHealth") *@
+</div>
+
+<div class="row">
+    <!-- Hiệu suất cảm biến -->
+    <div class="col-md-12 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">Sensor Performance</h6>
+            </div>
+            <div class="card-body">
+
+
+                @await Component.InvokeAsync("SensorPerformance", new { count = 0 })
+
+                <br />
+                OK      🟢 (Performance>=90) |
+                Warning 🟠 (Performance>=80)Vàng    |
+                Error/danger   🔴 (Performance dưới 80)Đỏ      |
+                Offline ⚫ Xám      |
+            </div>
+        </div>
+    </div>
+</div>

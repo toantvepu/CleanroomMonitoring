@@ -1,0 +1,110 @@
+﻿@using CleanroomMonitoring.Web.ViewModels
+@model Dictionary<string, List<ChartDataPoint>>
+@{
+    string chartId = ViewData["ChartId"]?.ToString() ?? "defaultChart";
+    string title = ViewData["ChartTitle"]?.ToString() ?? "Sensor Data";
+    string yAxisLabel = ViewData["YAxisLabel"]?.ToString() ?? "Value";
+    string xAxisLabel = ViewData["XAxisLabel"]?.ToString() ?? "Time";
+    string chartType = ViewData["ChartType"]?.ToString() ?? "line";
+    bool showLegend = ViewData["ShowLegend"] != null ? (bool)ViewData["ShowLegend"] : true;
+}
+
+<div class="chart-container">
+    <canvas id="@chartId" height="300"></canvas>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('@chartId').getContext('2d');
+
+        // Generate color palette for multiple datasets
+        var colorPalette = [
+            { borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.2)' },
+            { borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)' },
+            { borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)' },
+            { borderColor: 'rgba(255, 159, 64, 1)', backgroundColor: 'rgba(255, 159, 64, 0.2)' },
+            { borderColor: 'rgba(153, 102, 255, 1)', backgroundColor: 'rgba(153, 102, 255, 0.2)' },
+            { borderColor: 'rgba(255, 205, 86, 1)', backgroundColor: 'rgba(255, 205, 86, 0.2)' },
+            { borderColor: 'rgba(201, 203, 207, 1)', backgroundColor: 'rgba(201, 203, 207, 0.2)' }
+        ];
+
+        var datasets = [];
+
+    @{
+        int index = 0;
+    }
+
+    @foreach (var series in Model) {
+        <text>
+                    var data_@(series.Key.Replace("-", "_")) = @Html.Raw(Json.Serialize(series.Value));
+                    var colorIndex = @index % colorPalette.length;
+
+                    datasets.push({
+                        label: '@series.Key',
+                        data: data_@(series.Key.Replace("-", "_")).map(function(d) { return d.value; }),
+                        borderColor: colorPalette[colorIndex].borderColor,
+                        backgroundColor: colorPalette[colorIndex].backgroundColor,
+                        tension: 0.1,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+            @if (chartType == "bar") {
+                <text>barPercentage: 0.8,</text>
+            }
+                        fill: '@chartType' === 'line'
+                    });
+        </text>
+
+        index++;
+    }
+
+  
+    @{
+        var labels = Model.First().Value
+            .Select(p => p.Timestamp.ToString("MM/dd/yyyy HH:mm"))
+            .ToList();
+    }
+        new Chart(ctx, {
+            type: '@chartType',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '@title'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    legend: {
+                        display: @showLegend.ToString().ToLower()
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: '@yAxisLabel'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '@xAxisLabel'
+                        },
+                        ticks: {
+                            maxTicksLimit: 10,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

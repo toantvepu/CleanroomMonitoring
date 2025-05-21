@@ -1,0 +1,254 @@
+﻿@model CleanroomMonitoring.Web.ViewModels.SensorViewModel3
+
+@if (Model.SensorInfo != null) {
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-thermometer-half"></i> Thông tin chi tiết Sensor</h5>
+            <a asp-controller="Sensors2" asp-action="ExportToExcel"
+               asp-route-sensorId="@Model.SensorInfo.SensorInfoID"
+               asp-route-timeRange="@Model.SelectedTimeRange"
+               asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm:ss")"
+               asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm:ss")"
+               class="btn btn-sm btn-success">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Tên Sensor:</th>
+                            <td>@Model.SensorInfo.SensorName</td>
+                        </tr>
+                        <tr>
+                            <th>Loại Sensor:</th>
+                            <td>@(Model.SensorInfo.SensorType?.TypeName ?? "Không xác định")</td>
+                        </tr>
+                        <tr>
+                            <th>Đơn vị:</th>
+                            <td>@(Model.SensorInfo.SensorType?.Unit ?? "")</td>
+                        </tr>
+                        <tr>
+                            <th>Phòng:</th>
+                            <td>@(Model.SensorInfo.CleanRoom?.RoomName ?? "Không xác định")</td>
+                        </tr>
+                        <tr>
+                            <th>Vùng:</th>
+                            <td>@(Model.SensorInfo.CleanRoom?.Area ?? "Không xác định")</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Trạng thái:</th>
+                            <td>
+                                @if (Model.SensorInfo.IsActive) {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else {
+                                    <span class="badge bg-danger">Không hoạt động</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Địa chỉ IP:</th>
+                            <td>@(Model.SensorInfo.IpAddress ?? "Không xác định")</td>
+                        </tr>
+                        <tr>
+                            <th>Địa chỉ Modbus:</th>
+                            <td>@(Model.SensorInfo.ModbusAddress?.ToString() ?? "Không xác định")</td>
+                        </tr>
+                        <tr>
+                            <th>Phase:</th>
+                            <td>@(Model.SensorInfo.Phase ?? "Không xác định")</td>
+                        </tr>
+                        <tr>
+                            <th>Ghi chú:</th>
+                            <td>@(Model.SensorInfo.COMMENT ?? "Không có")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Dữ liệu theo dõi</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="sensorChart" style="width: 100%; height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6>Dữ liệu dạng bảng</h6>
+                            @* <button type="button" id="btnExportCSV" class="btn btn-sm btn-info">
+                                <i class="bi bi-file-earmark-text"></i> Xuất CSV
+                            </button> *@
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Thời gian</th>
+                                            <th>Giá trị (@Model.SensorInfo.SensorType?.Unit)</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.SensorReadings != null && Model.SensorReadings.Any()) {
+                                            foreach (var reading in Model.SensorReadings) {
+                                                <tr>
+                                                    <td>@reading.ReadingTime?.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                    <td>@reading.ReadingValue</td>
+                                                    <td>
+                                                        @if (reading.IsValid == true) {
+                                                            <span class="badge bg-success">Hợp lệ</span>
+                                                        }
+                                                        else {
+                                                            <span class="badge bg-danger">Không hợp lệ</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else {
+                                            <tr>
+                                                <td colspan="3" class="text-center">Không có dữ liệu</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chuẩn bị dữ liệu cho Chart.js
+            var ctx = document.getElementById('sensorChart').getContext('2d');
+
+            // Dữ liệu cho biểu đồ
+            var chartData = {
+                datasets: [{
+                    label: '@(Model.SensorInfo.SensorName)',
+                    data: [
+        @foreach (var reading in Model.SensorReadings) {
+            <text>
+                                    {
+                                            x: new Date('@reading.ReadingTime?.ToString("yyyy-MM-ddTHH:mm:ss")'),
+                                            y: @reading.ReadingValue
+                                    },
+            </text>
+        }
+                    ],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    tension: 0.1
+                }]
+            };
+
+                            // Lấy giá trị lớn nhất và nhỏ nhất từ dữ liệu
+        const dataValues = chartData.datasets[0].data.map(item => item.y);
+        const minValue = Math.min(...dataValues);
+        const maxValue = Math.max(...dataValues);
+
+        // Xác định khoảng đệm (ví dụ: 10% của khoảng giá trị)
+        const range = maxValue - minValue;
+        const padding = range * 0.1; // Điều chỉnh hệ số nếu cần
+
+        // Tính giá trị min và max mới cho trục Y
+        const suggestedMin = Math.floor(minValue - padding); // Làm tròn xuống để có số nguyên đẹp
+        const suggestedMax = Math.ceil(maxValue + padding);   // Làm tròn lên để có số nguyên đẹp
+
+        // Xác định bước nhảy mong muốn (ví dụ: 1)
+        const step = 1;
+
+
+            // Cấu hình biểu đồ
+            var config = {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute',
+                                displayFormats: {
+                                    minute: 'HH:mm'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Thời gian'
+                            }
+                        },
+                       y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: '@(Model.SensorInfo.SensorType?.TypeName ?? "")'
+                    },
+                    ticks: {
+                        stepSize: step, // Thiết lập bước nhảy cố định
+                        callback: function(value) {
+                            return Math.round(value); // Vẫn làm tròn để hiển thị số nguyên
+                        },
+                        min: suggestedMin, // Sử dụng suggestedMin làm giá trị min
+                        max: suggestedMax  // Sử dụng suggestedMax làm giá trị max
+                    },
+                    suggestedMin: suggestedMin, // Gợi ý giá trị min
+                    suggestedMax: suggestedMax  // Gợi ý giá trị max
+                }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return moment(tooltipItems[0].raw.x).format('DD/MM/YYYY HH:mm:ss');
+                                }
+                            },
+                             label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += Math.round(context.parsed.y);
+                            }
+                            return label;
+                        }
+                        }
+                    }
+                }
+            };
+
+            // Tạo biểu đồ
+            var sensorChart = new Chart(ctx, config);
+        });
+    </script>
+}
+else {
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Vui lòng chọn một sensor để xem thông tin chi tiết.
+    </div>
+}

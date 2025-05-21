@@ -1,0 +1,310 @@
+﻿ @model CleanroomMonitoring.Web.ViewModels.SensorViewModel2
+@{
+    ViewData["Title"] = "Sensor Information";
+}
+<h1>
+    Function Updating...
+</h1>
+<div class="container-fluid">
+    <h2 class="mt-3 mb-4">Sensor Information</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Select a sensor</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <select id="sensorSelect" class="form-control select2">
+                             @foreach (var sensor in Model.AvailableSensors)
+                            {
+                                <option value="@sensor.SensorInfoID">@sensor.SensorName (@sensor.CleanRoom?.RoomName - @sensor.SensorType?.TypeName)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Display Range</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="btn-group d-flex" role="group">
+                                <button type="button" class="btn btn-outline-primary time-range-btn @(Model.TimeRange == "4h" ? "active" : "")" data-range="4h">4 hours</button>
+                                <button type="button" class="btn btn-outline-primary time-range-btn @(Model.TimeRange == "8h" ? "active" : "")" data-range="8h">8 hours</button>
+                                <button type="button" class="btn btn-outline-primary time-range-btn @(Model.TimeRange == "24h" ? "active" : "")" data-range="24h">24 hours</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-outline-secondary w-100" id="customDateBtn">Custom Period</button> or <button type="button" class="btn btn-outline-secondary w-100" id="customDateBtn">Custom Range</button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3" id="customDateRange" style="display: none;">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>From</label>
+                                <input type="datetime-local" class="form-control" id="startDate" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>To</label>
+                                <input type="datetime-local" class="form-control" id="endDate" />
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button type="button" class="btn btn-primary" id="applyCustomDate">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sensorDataContainer">
+        @if (Model.SensorInfo != null) {
+            @await Component.InvokeAsync("SensorData", new {
+                    sensorInfoId = Model.SensorInfo.SensorInfoID,
+                    timeRange = Model.TimeRange,
+                    startDate = Model.StartDate,
+                    endDate = Model.EndDate
+                })
+        }
+        else {
+            <div class="alert alert-info">
+                No sensors selected or available.
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            padding: 5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialiser Select2
+            $('#sensorSelect').select2({
+                placeholder: "Select a sensor",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Variable to store the graph instance
+            let sensorChart = null;
+            let currentSensorId = $('#sensorSelect').val();
+            let currentTimeRange = $('.time-range-btn.active').data('range') || '4h';
+            let startDate = null;
+            let endDate = null;
+
+            // Initialize Flatpickr for date pickers
+            flatpickr("#startDate", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true
+            });
+
+            flatpickr("#endDate", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                defaultDate: new Date()
+            });
+
+            // Fonction pour charger les données du capteur
+            function loadSensorData() {
+                const sensorId = $('#sensorSelect').val();
+                if (!sensorId) return;
+
+                $.ajax({
+                    url: '@Url.Action("GetSensorData", "Sensors")',
+                    type: 'GET',
+                    data: {
+                        sensorInfoId: sensorId,
+                        timeRange: currentTimeRange,
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(data) {
+                        $('#sensorDataContainer').html(data);
+                        loadChartData();
+                    },
+                    error: function(error) {
+                        console.error("Error loading data:", error);
+                        $('#sensorDataContainer').html('<div class="alert alert-danger">Error loading sensor data.</div>');
+                    }
+                });
+            }
+
+            // Fonction pour charger les données du graphique
+            function loadChartData() {
+                const sensorId = $('#sensorSelect').val();
+                if (!sensorId) return;
+
+                $.ajax({
+                    url: '@Url.Action("GetChartData", "Sensors")',
+                    type: 'GET',
+                    data: {
+                        sensorInfoId: sensorId,
+                        timeRange: currentTimeRange,
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(data) {
+                        updateChart(data);
+                    },
+                    error: function(error) {
+                        console.error("Error loading sensor data to graph.:", error);
+                    }
+                });
+            }
+
+            // Function to update the chart
+            function updateChart(data) {
+                const ctx = document.getElementById('sensorChart');
+                if (!ctx) return;
+
+                // Destroy the existing graph if it exists
+                if (sensorChart) {
+                    sensorChart.destroy();
+                }
+
+               // Create a new chart
+                sensorChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: `${data.sensorName} (${data.unit})`,
+                            data: data.values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `History of measurements - ${data.sensorName}`
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: data.unit
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Heure'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Sensor change event
+            $('#sensorSelect').on('change', function() {
+                currentSensorId = $(this).val();
+                resetDateRange();
+                loadSensorData();
+            });
+
+            // Period change event 
+            $('.time-range-btn').on('click', function() {
+                $('.time-range-btn').removeClass('active');
+                $(this).addClass('active');
+                currentTimeRange = $(this).data('range');
+                resetDateRange();
+                loadSensorData();
+            });
+
+            // Show/hide custom date fields
+            $('#customDateBtn').on('click', function() {
+                $('#customDateRange').toggle();
+            });
+
+           // Apply custom period
+            $('#applyCustomDate').on('click', function() {
+                startDate = $('#startDate').val();
+                endDate = $('#endDate').val();
+
+                if (startDate && endDate) {
+                    currentTimeRange = 'custom';
+                    $('.time-range-btn').removeClass('active');
+                    loadSensorData();
+                } else {
+                    alert('Please select a start date and an end date.');
+                }
+            });
+
+            // Reset custom period
+            function resetDateRange() {
+                startDate = null;
+                endDate = null;
+                $('#customDateRange').hide();
+            }
+
+            // Load initial data if a sensor is already selected
+            if (currentSensorId) {
+                loadChartData();
+            }
+        });
+    </script>
+}
+<div class="row mb-4">
+    <div class="col-xl-12 col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            </div>
+            <!-- Component CleanRoomDashboard: Hiển thị bảng điều khiển tổng quan về trạng thái phòng sạch, bao gồm các chỉ số chính như nhiệt độ, độ ẩm, áp suất -->
+            <div class="card-body">
+                @await Component.InvokeAsync("CleanRoomDashboard")
+            </div>
+        </div>
+    </div>
+</div>

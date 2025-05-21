@@ -1,0 +1,173 @@
+﻿@model CleanroomMonitoring.Web.ViewComponents.EnhancedSensorMapViewModel
+<style>
+    @@keyframes pulse {
+        0%
+
+    {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .room-info-overlay {
+        position: absolute;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 5;
+        transform: translate(-50%, -50%);
+    }
+
+    .sensor-map-wrapper:hover .room-info-overlay,
+    body.show-room-info .room-info-overlay {
+        opacity: 1;
+    }
+
+    .room-info-content {
+        min-width: 150px;
+        font-size: 0.8rem;
+    }
+</style>
+<div class="sensor-map-wrapper">
+    <div class="sensor-map-legend mb-3">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <div class="legend-item">
+                <span class="legend-dot bg-success"></span> Normal
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot bg-warning"></span> Warning
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot bg-danger"></span> Critical
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot bg-secondary"></span> Inactive/Unknown
+            </div>
+
+            <div class="ms-auto">
+                <span class="badge bg-light text-dark border">
+                    <i class="bi bi-info-circle me-1"></i>
+                    @Model.RoomCount rooms with @Model.SensorCount sensors (@Model.AlertCount alerts)
+                </span>
+            </div>
+        </div>
+    </div>
+     
+    <div class="sensor-map-container">
+        <div class="position-relative">
+            <img src="~/img/layout/@(Model.CurrentFloor)P@(Model.CurrentPhase).png" class="img-fluid sensor-map-image" alt="Floor Map" />
+
+            @foreach (var sensor in Model.SensorMapItems) {
+                <div class="sensor-marker @(sensor.HasAlert ? "pulsing" : "")"
+                     style="left: @(sensor.XCoordinate)px; top: @(sensor.YCoordinate)px;"
+                     data-sensor-id="@sensor.SensorId"
+                     data-room-id="@sensor.RoomId"
+                     data-bs-toggle="tooltip"
+                     data-bs-html="true"
+                     title="<strong>@sensor.SensorName</strong><br>Room: @sensor.RoomName<br>Type: @sensor.SensorTypeName<br>Value: @(sensor.CurrentValue.HasValue ? $"{sensor.CurrentValue.Value.ToString("0.##")} {sensor.SensorTypeUnit}" : "N/A")">
+                    <span class="sensor-icon text-@sensor.StatusClass">
+                        <i class="@sensor.Icon"></i>
+                    </span>
+                </div>
+            }
+
+            <!-- Room information overlays -->
+            @foreach (var roomGroup in Model.SensorMapItems.GroupBy(s => s.RoomId).Where(g => g.Key > 0)) {
+                var roomSensors = roomGroup.ToList();
+                if (roomSensors.Any()) {
+                    var firstSensor = roomSensors.First();
+                    var avgX = roomSensors.Average(s => s.XCoordinate);
+                    var avgY = roomSensors.Average(s => s.YCoordinate);
+
+                    var hasAlert = roomSensors.Any(s => s.HasAlert);
+                    var statusClass = roomSensors.Any(s => s.StatusClass == "danger") ? "danger" :
+                    roomSensors.Any(s => s.StatusClass == "warning") ? "warning" : "success";
+
+                    <div class="room-info-overlay"
+                         style="left: @(avgX)px; top: @(avgY)px;"
+                         data-room-id="@firstSensor.RoomId">
+                        <div class="room-info-content bg-light p-2 rounded shadow-sm border border-@statusClass">
+                            <div class="room-name fw-bold">@firstSensor.RoomName</div>
+                            <div class="sensor-list">
+                                @foreach (var sensorGroup in roomSensors.GroupBy(s => s.SensorTypeName)) {
+                                    var typeSensors = sensorGroup.ToList();
+                                    var sensorType = sensorGroup.Key;
+                                    var icon = typeSensors.First().Icon;
+                                    var typeStatus = typeSensors.Any(s => s.StatusClass == "danger") ? "danger" :
+                                    typeSensors.Any(s => s.StatusClass == "warning") ? "warning" : "success";
+
+                                    <div class="sensor-type-group d-flex align-items-center">
+                                        <i class="@icon text-@typeStatus me-1"></i>
+                                        <small>
+                                            @sensorType:
+                                            @{
+                                                var avgValue = typeSensors
+                                                .Where(s => s.CurrentValue.HasValue)
+                                                .Select(s => s.CurrentValue.Value)
+                                                .DefaultIfEmpty(0)
+                                                .Average();
+
+                                                var unit = typeSensors.First().SensorTypeUnit;
+                                            }
+                                            <span class="text-@typeStatus fw-bold">
+                                                @avgValue.ToString("0.##") @unit
+                                            </span>
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+ 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                placement: 'top',
+                container: 'body'
+            });
+        });
+
+        // Sensor marker click handler
+        document.querySelectorAll('.sensor-marker').forEach(function(marker) {
+            marker.addEventListener('click', function() {
+                var sensorId = this.getAttribute('data-sensor-id');
+                window.location.href = '/Sensors2/Details/' + sensorId;
+            });
+        });
+    });
+</script>

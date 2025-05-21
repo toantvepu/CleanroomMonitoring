@@ -1,0 +1,120 @@
+﻿
+@* Views/Shared/Components/SensorTrendChart/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewComponents.SensorTrendChartViewModel
+
+<div class="card">
+    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Biểu đồ @Model.SensorInfo.SensorType.TypeName</h5>
+        <div>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-light @(Model.HoursBack == 24 ? "active" : "")"
+                        onclick="updateChart(@Model.SensorInfo.SensorInfoID, 24)">
+                    24h
+                </button>
+                <button type="button" class="btn btn-outline-light @(Model.HoursBack == 72 ? "active" : "")"
+                        onclick="updateChart(@Model.SensorInfo.SensorInfoID, 72)">
+                    3d
+                </button>
+                <button type="button" class="btn btn-outline-light @(Model.HoursBack == 168 ? "active" : "")"
+                        onclick="updateChart(@Model.SensorInfo.SensorInfoID, 168)">
+                    7d
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="chart-@Model.SensorInfo.SensorInfoID" height="250"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('chart-@Model.SensorInfo.SensorInfoID').getContext('2d');
+        const readings = @Json.Serialize(Model.Readings.Select(r => new {
+            x = r.ReadingTime,
+            y = r.ReadingValue
+        }));
+
+        // Thresholds from sensor config
+        const lowThreshold = @(Model.SensorConfig?.LowAlertThreshold?.ToString() ?? "null");
+        const highThreshold = @(Model.SensorConfig?.HighAlertThreshold?.ToString() ?? "null");
+
+        const chart = new Chart(ctx, {
+            type: '@Model.ChartType',
+            data: {
+                datasets: [{
+                    label: '@Model.SensorInfo.SensorType.TypeName (@Model.SensorInfo.SensorType.Unit)',
+                    data: readings,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 1,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            displayFormats: {
+                                hour: 'HH:mm',
+                                day: 'dd/MM'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Thời gian'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '@Model.SensorInfo.SensorType.Unit'
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            lowLine: lowThreshold ? {
+                                type: 'line',
+                                yMin: lowThreshold,
+                                yMax: lowThreshold,
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                label: {
+                                    enabled: true,
+                                    content: 'Ngưỡng thấp',
+                                    position: 'start'
+                                }
+                            } : undefined,
+                            highLine: highThreshold ? {
+                                type: 'line',
+                                yMin: highThreshold,
+                                yMax: highThreshold,
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                label: {
+                                    enabled: true,
+                                    content: 'Ngưỡng cao',
+                                    position: 'start'
+                                }
+                            } : undefined
+                        }
+                    }
+                }
+            }
+        });
+
+        window.updateChart = function(sensorId, hoursBack) {
+            window.location.href = window.location.pathname +
+                '?sensorInfoId=' + sensorId +
+                '&hoursBack=' + hoursBack;
+        };
+    });
+</script>

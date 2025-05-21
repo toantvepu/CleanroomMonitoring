@@ -1,0 +1,144 @@
+﻿@model CleanroomMonitoring.Web.Controllers.AlertDetailsViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết cảnh báo";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Chi tiết cảnh báo</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Thông tin cơ bản</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Phòng sạch:</dt>
+                        <dd class="col-sm-8">@Model.CleanRoomName</dd>
+
+                        <dt class="col-sm-4">Cảm biến:</dt>
+                        <dd class="col-sm-8">@Model.SensorName</dd>
+
+                        <dt class="col-sm-4">Loại cảm biến:</dt>
+                        <dd class="col-sm-8">@Model.SensorTypeName</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Vị trí:</dt>
+                        <dd class="col-sm-8">@Model.LocationName</dd>
+
+                        <dt class="col-sm-4">Thời gian:</dt>
+                        <dd class="col-sm-8">@Model.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin cảnh báo bất thường -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Cảnh báo giá trị bất thường</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.HasAbnormalValue ? "bg-danger" : "bg-success")">
+                        @(Model.HasAbnormalValue ? "Bất thường" : "Bình thường")
+                    </span>
+                </dd>
+
+                @if (Model.HasAbnormalValue) {
+                    <dt class="col-sm-3">Loại bất thường:</dt>
+                    <dd class="col-sm-9">@Model.AbnormalValueType</dd>
+
+                    <dt class="col-sm-3">Thời điểm phát hiện:</dt>
+                    <dd class="col-sm-9">@Model.AbnormalValueTime?.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                    <dt class="col-sm-3">Mô tả:</dt>
+                    <dd class="col-sm-9">@Model.AbnormalValueDescription</dd>
+                }
+            </dl>
+        </div>
+    </div>
+
+    <!-- Thông tin kết nối -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Trạng thái kết nối</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Trạng thái:</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.IsConnected ? "bg-success" : "bg-danger")">
+                        @(Model.IsConnected ? "Đang kết nối" : "Mất kết nối")
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">Lần kết nối cuối:</dt>
+                <dd class="col-sm-9">@Model.LastConnectionTime?.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                <dt class="col-sm-3">Số lần mất kết nối:</dt>
+                <dd class="col-sm-9">@Model.DisconnectionCount</dd>
+
+                <dt class="col-sm-3">Vấn đề gần nhất:</dt>
+                <dd class="col-sm-9">@Model.LastIssueType - @Model.LastIssueDescription</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Lịch sử kiểm tra sức khỏe -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Lịch sử kiểm tra</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th>Loại vấn đề</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var check in Model.HealthCheckHistory) {
+                        <tr>
+                            <td>@check.CheckTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>
+                                <span class="badge @GetStatusBadgeClass(check.Status)">
+                                    @check.Status
+                                </span>
+                            </td>
+                            <td>@check.IssueType</td>
+                            <td>@check.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status.ToUpper() switch {
+            "OK" => "bg-success",
+            "WARNING" => "bg-warning",
+            "ERROR" => "bg-danger",
+            "RECOVERED" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+}

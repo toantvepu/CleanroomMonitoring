@@ -1,0 +1,116 @@
+﻿@using CleanroomMonitoring.Web.ViewModels
+@model Dictionary<int, List<AlertEvent>>
+@{
+    var totalAlerts = Model.Values.Sum(list => list.Count);
+    var sensorNames = new Dictionary<int, string>();
+    foreach (var sensorAlerts in Model) {
+        if (sensorAlerts.Value.Any()) {
+            sensorNames[sensorAlerts.Key] = sensorAlerts.Value.First().SensorName;
+        }
+    }
+}
+
+<div class="card-body">
+    @if (totalAlerts == 0) {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i> No alerts recorded during the selected time period.
+        </div>
+    }
+    else {
+        <div class="alert alert-warning mb-3">
+            <i class="fas fa-exclamation-circle me-2"></i> <strong>@totalAlerts alert(s)</strong> recorded during the selected time period.
+        </div>
+
+        <ul class="nav nav-tabs" id="alertTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-alerts-tab" data-bs-toggle="tab" data-bs-target="#all-alerts"
+                        type="button" role="tab" aria-controls="all-alerts" aria-selected="true">
+                    All Alerts
+                </button>
+            </li>
+            @foreach (var sensorId in sensorNames.Keys) {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sensor-@sensorId-alerts-tab" data-bs-toggle="tab"
+                            data-bs-target="#sensor-@sensorId-alerts" type="button" role="tab">
+                        @sensorNames[sensorId]
+                    </button>
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content mt-3" id="alertTabContent">
+            <div class="tab-pane fade show active" id="all-alerts" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>Sensor</th>
+                                <th>Alert Type</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Duration</th>
+                                <th>Threshold</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sensorAlerts in Model) {
+                                @foreach (var alert in sensorAlerts.Value) {
+                                    <tr class="@(alert.AlertType == "High" ? "table-danger" : alert.AlertType == "Low" ? "table-warning" : "table-secondary")">
+                                        <td>@alert.SensorName</td>
+                                        <td>@alert.AlertType</td>
+                                        <td>@alert.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>@(alert.EndTime.HasValue ? alert.EndTime.Value.ToString("yyyy-MM-dd HH:mm:ss") : "N/A")</td>
+                                        <td>@(alert.Duration.TotalHours.ToString("F1")) hours</td>
+                                        <td>@alert.ThresholdValue</td>
+                                        <td>@alert.ActualValue</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @foreach (var sensorId in sensorNames.Keys) {
+                <div class="tab-pane fade" id="sensor-@sensorId-alerts" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover datatable">
+                            <thead>
+                                <tr>
+                                    <th>Alert Type</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Duration</th>
+                                    <th>Threshold</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in Model[sensorId]) {
+                                    <tr class="@(alert.AlertType == "High" ? "table-danger" : alert.AlertType == "Low" ? "table-warning" : "table-secondary")">
+                                        <td>@alert.AlertType</td>
+                                        <td>@alert.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>@(alert.EndTime.HasValue ? alert.EndTime.Value.ToString("yyyy-MM-dd HH:mm:ss") : "N/A")</td>
+                                        <td>@(alert.Duration.TotalHours.ToString("F1")) hours</td>
+                                        <td>@alert.ThresholdValue</td>
+                                        <td>@alert.ActualValue</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $('.datatable').DataTable({
+            order: [[2, 'desc']],
+            pageLength: 10
+        });
+    });
+</script>

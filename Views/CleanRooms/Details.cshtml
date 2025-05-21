@@ -1,0 +1,107 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Chi tiết phòng";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Chi tiết phòng</h2>
+        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-secondary">Quay lại Dashboard</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Biểu đồ nhiệt độ, độ ẩm, áp suất</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Phần này sẽ hiển thị biểu đồ -->
+                    <div id="temperatureChart" style="height: 300px;"></div>
+                    <div id="humidityChart" style="height: 300px; margin-top: 20px;"></div>
+                    <div id="pressureChart" style="height: 300px; margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Báo cáo thống kê</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Phần này sẽ hiển thị bảng thống kê chi tiết -->
+                    <!-- Ví dụ: Bảng dữ liệu theo từng giờ -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sẽ cần gọi API để lấy dữ liệu và vẽ biểu đồ
+        // Ví dụ code để vẽ biểu đồ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gọi API để lấy dữ liệu của phòng có ID = @Model
+            fetch('/api/roomdata/@Model')
+                .then(response => response.json())
+                .then(data => {
+                    drawTemperatureChart(data);
+                    drawHumidityChart(data);
+                    drawPressureChart(data);
+                });
+        });
+
+               function drawTemperatureChart(data) {
+            const validData = data.Temperature.filter(item => item.IsValid);
+            const invalidData = data.Temperature.filter(item => !item.IsValid);
+
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Nhiệt độ hợp lệ',
+                            data: validData.map(item => ({ x: new Date(item.Time), y: item.Value })),
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Nhiệt độ không hợp lệ',
+                            data: invalidData.map(item => ({ x: new Date(item.Time), y: item.Value })),
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgb(255, 99, 132)',
+                            pointStyle: 'triangle',
+                            pointRadius: 6,
+                            showLine: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'hour'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawHumidityChart(data) {
+            // Code vẽ biểu đồ độ ẩm
+        }
+
+        function drawPressureChart(data) {
+            // Code vẽ biểu đồ áp suất
+        }
+    </script>
+}

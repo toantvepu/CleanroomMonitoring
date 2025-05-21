@@ -1,0 +1,35 @@
+﻿@model CleanroomMonitoring.Web.ViewComponents.SystemHealthViewModel
+
+<div class="card border-left-info shadow h-100 py-2">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                    <a asp-controller="SensorPerformance" asp-action="Index">
+                        System Health
+                     </a>
+                    
+                    </div>
+                <div class="row no-gutters align-items-center">
+                    <div class="col-auto">
+                        <div class="h2 mb-0 mr-3 font-weight-bold text-gray-800">@Model.SensorUptime.ToString("0")<span class="small">%</span></div>
+                    </div>
+                    <div class="col">
+                        <div class="progress progress-sm mr-2">
+                            <div class="progress-bar bg-@Model.StatusClass" role="progressbar"
+                                 style="width: @Model.SensorUptime%" aria-valuenow="@Model.SensorUptime.ToString("0")" aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 small">
+                    <div>Last Data: @(Model.LastDataCollectionTime?.ToString("HH:mm:ss") ?? "No data")</div>
+                    <div>@Model.OfflineSensors Sensors Offline</div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <i class="bi bi-activity fa-2x text-gray-300"></i>
+            </div>
+        </div>
+    </div>
+</div>

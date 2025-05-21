@@ -1,0 +1,114 @@
+﻿@model CleanroomMonitoring.Web.Models.SensorInfo
+
+@{
+    ViewData["Title"] = "Edit Sensor";
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2>Edit Sensor</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Sensor Details</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="All" class="text-danger"></div>
+             
+                <input type="hidden" asp-for="SensorInfoID" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SensorName" class="control-label">Sensor Name</label>
+                            <input asp-for="SensorName" class="form-control" />
+                            <span asp-validation-for="SensorName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SensorTypeID" class="control-label">Sensor Type</label>
+                            <select asp-for="SensorTypeID" class="form-control" asp-items="ViewBag.SensorTypeID">
+                                <option value="">-- Select Sensor Type --</option>
+                            </select>
+                            <span asp-validation-for="SensorTypeID" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="RoomID" class="control-label">Clean Room</label>
+                            <select asp-for="RoomID" class="form-control" asp-items="ViewBag.RoomID">
+                                <option value="">-- Select Clean Room --</option>
+                            </select>
+                            <span asp-validation-for="RoomID" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="IsActive" class="control-label">Status</label>
+                            <div class="form-check mt-2">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label" for="IsActive">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="ModbusAddress" class="control-label">Modbus Address</label>
+                            <input asp-for="ModbusAddress" class="form-control" />
+                            <span asp-validation-for="ModbusAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="IpAddress" class="control-label">IP Address</label>
+                            <input asp-for="IpAddress" class="form-control" />
+                            <span asp-validation-for="IpAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Phase" class="control-label">Phase</label>
+                            <select asp-for="Phase" class="form-control"> 
+                                <option value="1FP1">1FP1</option>
+                                <option value="2FP1">2FP1</option>
+                                <option value="2FP2">2FP2</option>
+                                <option value="3FP1">3FP1</option>
+                                <option value="3FP2">3FP2</option>
+                            </select>
+                            <span asp-validation-for="Phase" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="COMMENT" class="control-label">Comments</label>
+                    <textarea asp-for="COMMENT" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="COMMENT" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

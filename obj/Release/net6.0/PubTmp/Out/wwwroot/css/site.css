@@ -1,0 +1,161 @@
+﻿:root {
+    --primary-dark: #4e73df;
+    --primary-light: #f8f9fc;
+    --gray-dark: #5a5c69;
+    --success: #1cc88a;
+    --info: #36b9cc;
+    --warning: #f6c23e;
+    --danger: #e74a3b;
+}
+
+body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fc;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.card .card-body {
+    flex: 1 1 auto;
+    min-height: 1px;
+    padding: 1.25rem;
+}
+.center-content {
+    display: flex;
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+/* Border Left Utilities */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+}
+
+/* Sidebar */
+.nav-link {
+    transition: all 0.2s ease-in-out;
+}
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link.active {
+        font-weight: bold;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+/* Alerts & Notifications */
+.dropdown-list-image {
+    position: relative;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+    .dropdown-list-image img {
+        height: 2.5rem;
+        width: 2.5rem;
+    }
+
+/* Text colors */
+.text-gray-100 {
+    color: #f8f9fc;
+}
+
+.text-gray-200 {
+    color: #eaecf4;
+}
+
+.text-gray-300 {
+    color: #dddfeb;
+}
+
+.text-gray-400 {
+    color: #d1d3e2;
+}
+
+.text-gray-500 {
+    color: #b7b9cc;
+}
+
+.text-gray-600 {
+    color: #858796;
+}
+
+.text-gray-700 {
+    color: #6e707e;
+}
+
+.text-gray-800 {
+    color: #5a5c69;
+}
+
+.text-gray-900 {
+    color: #3a3b45;
+}
+
+/* Font weights */
+.font-weight-bold {
+    font-weight: 600 !important;
+}
+
+/* Dashboard specific styles */
+.chart-container {
+    position: relative;
+    margin: auto;
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table td, .table th {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #e3e6f0;
+}
+
+.bi {
+    font-size: 1.2rem;
+}
+
+.bi.fa-2x {
+        font-size: 2rem;
+    }
+
+.fs-4, .fs-5, .fs-6 {
+    font-weight: bold;
+}
+
+.btn-selected {
+    border: 3px solid #007bff !important;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+    transition: all 0.2s ease;
+}

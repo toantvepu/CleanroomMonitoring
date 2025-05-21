@@ -1,0 +1,464 @@
+﻿@{
+    ViewData["Title"] = "Clean Room Environmental Monitoring Dashboard";
+}
+
+<!-- Status Overview Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        @await Component.InvokeAsync("RoomsSummary")
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        @await Component.InvokeAsync("SensorsSummary")
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        @await Component.InvokeAsync("AlertsSummary")
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        @await Component.InvokeAsync("SystemHealth")
+    </div>
+</div>
+
+<!-- Critical Alerts Panel -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-danger">Critical Alerts</h6>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" id="btnAcknowledgeAll">Acknowledge All</button>
+                    <a href="@Url.Action("Index", "Alerts")" class="btn btn-sm btn-outline-primary">View All Alerts</a>
+                </div>
+            </div>
+            <div class="card-body">
+                @await Component.InvokeAsync("CriticalAlerts", new { maxAlerts = 5 })
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Facility Map -->
+<div class="row mb-4">
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Facility Map</h6>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-secondary map-option active" data-map="1F">1F</button>
+                    <button class="btn btn-sm btn-outline-secondary map-option" data-map="2F">2F</button>
+                    <button class="btn btn-sm btn-outline-secondary map-option" data-map="3F">3F</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary sensor-filter active" data-type="all">All Sensors</button>
+                        <button class="btn btn-outline-danger sensor-filter" data-type="temperature">Temperature</button>
+                        <button class="btn btn-outline-info sensor-filter" data-type="humidity">Humidity</button>
+                        <button class="btn btn-outline-success sensor-filter" data-type="pressure">Pressure</button>
+                        <button class="btn btn-outline-warning sensor-filter" data-type="alerts">Alerts Only</button>
+                    </div>
+                    <div class="form-check form-switch d-inline-block ms-3">
+                        <input class="form-check-input" type="checkbox" id="showRoomInfo">
+                        <label class="form-check-label small" for="showRoomInfo">Show Room Details</label>
+                    </div>
+                </div>
+                <div id="sensor-map-container" style="min-height: 400px;">
+                    @await Component.InvokeAsync("SensorMap", new { area = "1F", sensorType = "all" })
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-12 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                @await Component.InvokeAsync("EnhancedSensorMap", new { area = "1F", sensorType = "all" })
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Real-time Monitoring Panel -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="realtime-monitoring">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="m-0" id="roomName">
+                            <!-- Sẽ được cập nhật bằng JavaScript -->
+                        </h6>
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-clock"></i> Last updated: <span id="lastUpdateTime"></span>
+                        </span>
+                    </div>
+                    <!-- Dropdown chọn phòng -->
+                    <div class="dropdown">
+                        <select id="roomSelector" class="form-select form-select-sm">
+                            <option value="0">All Rooms</option>
+                            @if (ViewBag.CleanRooms != null)
+                            {
+                                foreach (var room in ViewBag.CleanRooms) {
+                                    <option value="@room.RoomName"></option>
+                                }
+                            }
+                        </select>
+                </div>
+
+                <span class="badge bg-secondary">
+                    <i class="bi bi-clock"></i> Last updated: <span id="lastUpdateTime"></span>
+                </span>
+            </div>
+                <div id="sensorContainer" data-api-url="@Url.Action("realtime", "SensorDataApi", new { area = "api" })"></div>
+                <!-- Container cho từng cảm biến, sẽ được tạo động bằng JavaScript -->
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i> Loading sensor data...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  
+ 
+
+<!-- Environmental Trends -->
+<div class="row mb-4">
+    <div class="col-xl-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Environmental Trends</h6>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <!-- Room/Area Filter -->
+                    <div>
+                        <label class="small me-1">Area:</label>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary phase-option btn-selected" data-phase="ALL">ALL</button>
+                            <button class="btn btn-outline-secondary phase-option" data-phase="1FP1">1F-P1</button>
+                            <button class="btn btn-outline-secondary phase-option" data-phase="2FP1">2F-P1</button>
+                            <button class="btn btn-outline-secondary phase-option" data-phase="2FP2">2F-P2</button>
+                            <button class="btn btn-outline-secondary phase-option" data-phase="3FP1">3F-P1</button>
+                            <button class="btn btn-outline-secondary phase-option" data-phase="3FP2">3F-P2</button>
+                        </div>
+                    </div>
+
+                    <!-- Time Range -->
+                    <div>
+                        <label class="small me-1">Range:</label>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary time-range-option" data-range="2h">2h</button>
+                            <button class="btn btn-outline-secondary time-range-option" data-range="8h">8h</button>
+                            <button class="btn btn-outline-secondary time-range-option btn-selected" data-range="24h">24h</button>
+                            <button class="btn btn-outline-secondary time-range-option" data-range="7d">7d</button>
+                            <button class="btn btn-outline-secondary time-range-option" data-range="30d">30d</button>
+                        </div>
+                    </div>
+
+                    <!-- Data Interval -->
+                    <div>
+                        <label class="small me-1">Interval:</label>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary interval-option" data-interval="1">1m</button>
+                            <button class="btn btn-outline-secondary interval-option" data-interval="5">5m</button>
+                            <button class="btn btn-outline-secondary interval-option btn-selected" data-interval="15">15m</button>
+                            <button class="btn btn-outline-secondary interval-option" data-interval="60">1h</button>
+                        </div>
+                    </div>
+
+                    <!-- Compare Toggle -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="compareToggle">
+                        <label class="form-check-label small" for="compareToggle">Compare with Previous</label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <button id="applyFilter" class="btn btn-primary btn-sm">Apply</button>
+                    <button id="btnAutoRefresh" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        <span id="autoRefreshText">Auto Refresh</span>
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+                            Export
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <li><a class="dropdown-item" href="#" id="btnExportData">Export to Excel</a></li>
+                            <li><a class="dropdown-item" href="#" id="btnExportChart">Export Chart Image</a></li>
+                            <li><a class="dropdown-item" href="#" id="btnGenerateReport">Generate Report</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="sensorChartContainer">
+                @await Component.InvokeAsync("SensorReadingsChart", new { range = "24h", interval = 15, area = "ALL" })
+            </div>
+            <div class="card-footer small text-muted">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div id="chartLastUpdated">Last updated: <span>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span></div>
+                    <div><span id="recordCountText"></span> data points</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Health and Sensor Performance -->
+<div class="row">
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold">Sensor Performance</h6>
+                <a href="@Url.Action("Index", "SensorPerformance")" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="sensorPerformanceTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#healthTab">Health Status</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#calibrationTab">Calibration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#dataQualityTab">Data Quality</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="healthTab">
+                        @await Component.InvokeAsync("SensorHealth")
+                    </div>
+                    <div class="tab-pane fade" id="calibrationTab">
+                        @* @await Component.InvokeAsync("SensorCalibration") *@
+                    </div>
+                    <div class="tab-pane fade" id="dataQualityTab">
+                        @* @await Component.InvokeAsync("SensorDataQuality") *@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold">Maintenance Schedule</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary">View Calendar</a>
+            </div>
+            <div class="card-body">
+                @* @await Component.InvokeAsync("MaintenanceSchedule") *@
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    
+
+    @* Vẽ đồ thi *@
+        <script src="~/js/sensorchart.js"></script> 
+        <script src="~/js/cleanroom-monitoring.js"></script>
+      
+
+
+       
+
+    <script>
+        let selectedRange = "24h";
+        let selectedInterval = 15;
+        let phase = "1FP1";
+
+        $(document).ready(function () {
+            $(".time-range-option").click(function () {
+                $(".time-range-option").removeClass("btn-secondary btn-selected").addClass("btn-outline-secondary");
+                $(this).removeClass("btn-outline-secondary").addClass("btn-selected ");
+                selectedRange = $(this).data("range"); //Gán dữ liệu vào biến
+                $("#applyFilter").click(); // Gọi luôn lọc dữ liệu và hiển thị biểu đồ
+
+                updateIntervalOptions();
+            });
+
+            $(".interval-option").click(function () {
+                $(".interval-option").removeClass("btn-secondary btn-selected").addClass("btn-outline-secondary");
+                $(this).removeClass("btn-outline-secondary").addClass("btn-selected");
+                selectedInterval = $(this).data("interval");
+                $("#applyFilter").click(); // Gọi luôn lọc dữ liệu và hiển thị biểu đồ
+
+            });
+            $(".phase-option").click(function () {
+                $(".phase-option").removeClass("btn-secondary btn-selected").addClass("btn-outline-secondary");
+                $(this).removeClass("btn-outline-secondary").addClass("btn-selected");
+                phase = $(this).data("phase");
+             console.log(phase);
+                $("#applyFilter").click(); // Gọi luôn lọc dữ liệu và hiển thị biểu đồ
+            });
+
+            $("#applyFilter").click(function () {
+                     console.log(phase);
+
+            var sensorReadingsChartUrl = '@Url.Action("SensorReadingsChart", "Components")';
+                    var url = sensorReadingsChartUrl + `?range=${selectedRange}&interval=${selectedInterval}&area=${phase}`;
+                             console.log("Toàn test");
+                             console.log(url);
+                $.get(url, function (html) {
+                    $("#sensorChartContainer").html(html);
+                     // Chờ DOM cập nhật xong rồi initChart
+                    setTimeout(() => {
+                        if (window.sensorChartData) {
+                            initChart(window.sensorChartData);
+                            initSensorChartButtons(); // <== GỌI LẠI ĐÂY
+                        }
+                    }, 50); // delay nhẹ cho chắc
+                });
+            });
+        });
+
+        //Giới hạn interval theo time range Giải quyết trường hơp Interval nhỏ + time range lớn = quá nhiều nhóm, thiếu dữ liệu.
+                function updateIntervalOptions() {
+            // if(selectedRange === "8h" ||selectedRange === "24h" || selectedRange === "7d" || selectedRange === "30d") {
+            //     $(".interval-option[data-interval='2'], .interval-option[data-interval='5']").prop("disabled", true);
+            //     // Nếu đang chọn interval bị disable thì tự động chọn interval khác
+            //     if(selectedInterval == 1 || selectedInterval == 2) {
+            //         selectedInterval = 5;
+            //         $(".interval-option").removeClass("btn-selected");
+            //         $(".interval-option[data-interval='15']").addClass("btn-selected");
+            //     }
+            // } else {
+            //     $(".interval-option").prop("disabled", false);
+            // }
+
+
+        }
+
+
+        /*Phần rảnh háng*/
+        /*Auto refresh*/
+        //Thêm biến và hàm JS để xử lý auto refresh
+                let autoRefresh = false;
+        let autoRefreshInterval = null;
+        let refreshTime = 60000; // 60 giây
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(function () {
+                $("#applyFilter").click();
+            }, refreshTime * 1000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
+        //Bắt sự kiện cho nút Auto Refresh
+        $("#btnAutoRefresh").click(function () {
+            autoRefresh = !autoRefresh;
+            if (autoRefresh) {
+                $("#autoRefreshText").text("Đang tự động cập nhật...");
+                startAutoRefresh();
+            } else {
+                $("#autoRefreshText").text("Auto Refresh");
+                stopAutoRefresh();
+            }
+        });
+        // Tắt auto refresh khi rời trang (tùy chọn)
+        $(window).on('beforeunload', function () {
+            stopAutoRefresh();
+        });
+
+        //Xuất dữ liệu ra file Excel
+
+                $("#btnExportData").click(function(e){
+            e.preventDefault();
+
+            //window.location.href = `/Export/SensorReadingsFull?range=${selectedRange}&interval=${selectedInterval}&phase=${phase}`;
+             var exportUrl = '@Url.Action("SensorReadingsFull", "Export")';
+            var url = exportUrl + `?range=${selectedRange}&interval=${selectedInterval}&phase=${phase}`
+            window.location.href =url;
+        });
+    </script>
+
+
+    <script>
+        // Danh sách các tầng
+        const floors = ["1F", "2F", "3F"];
+        let currentFloorIndex = 0;
+        let autoSlideInterval = null;
+        let isPaused = false;
+
+        function loadFloor(area) {
+            // Gọi lại ViewComponent bằng AJAX (jQuery)
+            // $("#sensor-map-container").load(`/Components/GetSensorMap?area=${area}`);
+            $("#sensor-map-container").load('@Url.Action("GetSensorMap", "Components")?area=' + area);
+            // Đổi trạng thái nút
+            $(".map-option").removeClass("active");
+            $(`.map-option[data-map='${area}']`).addClass("active");
+        }
+
+        function startAutoSlide() {
+            if (autoSlideInterval) clearInterval(autoSlideInterval);
+            autoSlideInterval = setInterval(function () {
+                if (!isPaused) {
+                    currentFloorIndex = (currentFloorIndex + 1) % floors.length;
+                    loadFloor(floors[currentFloorIndex]);
+                }
+            }, 300000); // 30 giây
+        }
+
+        $(document).ready(function () {
+            // Click nút chuyển tầng thủ công
+            $(".map-option").click(function () {
+                let area = $(this).data("map");
+                currentFloorIndex = floors.indexOf(area);
+                loadFloor(area);
+            });
+
+            // Khi hover vào ảnh hoặc overlay, dừng auto slide
+            $(document).on("mouseenter", "#sensor-map-container", function () {
+                isPaused = true;
+            });
+            $(document).on("mouseleave", "#sensor-map-container", function () {
+                isPaused = false;
+            });
+
+            // Khởi động auto slide
+            startAutoSlide();
+        });
+    </script>
+    <script>
+         $(document).ready(function () {
+            $('#cboShowInfo').change(function () {
+                console.log('cboShowInfo');
+                if ($(this).is(':checked')) {
+                    $('body').addClass('show-room-info');
+                } else {
+                    $('body').removeClass('show-room-info');
+                }
+            });
+        });
+    </script>
+
+    <script>
+                 // EnhancedSensorMap
+        $(document).ready(function() {
+            $('.sensor-filter').click(function() {
+                $('.sensor-filter').removeClass('active');
+                $(this).addClass('active');
+
+                var sensorType = $(this).data('type');
+                var area = $('.map-option.active').data('map');
+
+                // Add phase if needed
+                if (area.indexOf('P') === -1) {
+                    area = area + 'P1'; // Default to phase 1
+                }
+
+                loadSensorMap(area, sensorType);
+            });
+
+            function loadSensorMap(area, sensorType) {
+                $('#sensor-map-container').load('@Url.Action("GetSensorMap", "Components")?area=' + area + '&sensorType=' + sensorType);
+            }
+        });
+
+
+           
+    </script>
+
+
+}

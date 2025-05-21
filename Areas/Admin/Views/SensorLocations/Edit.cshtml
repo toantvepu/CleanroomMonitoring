@@ -1,0 +1,149 @@
+﻿@model CleanroomMonitoring.Web.Models.SensorLocation
+
+@{
+    ViewData["Title"] = "Edit Sensor Location";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Edit Sensor Location</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="SensorInfos" asp-action="Index">Sensors</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="SensorInfos" asp-action="Details" asp-route-id="@Model.SensorInfoID">Sensor Details</a></li>
+        <li class="breadcrumb-item active">Edit Location</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-map-marker-alt me-1"></i>
+            Edit Location for @Model.SensorInfo?.SensorName
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="LocationID" />
+                <input type="hidden" asp-for="SensorInfoID" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="LocationName" class="control-label">Location Name</label>
+                            <input asp-for="LocationName" class="form-control" />
+                            <span asp-validation-for="LocationName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="XCoordinate" class="control-label">X Coordinate</label>
+                            <input asp-for="XCoordinate" class="form-control" />
+                            <span asp-validation-for="XCoordinate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="YCoordinate" class="control-label">Y Coordinate</label>
+                            <input asp-for="YCoordinate" class="form-control" />
+                            <span asp-validation-for="YCoordinate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="ZCoordinate" class="control-label">Z Coordinate</label>
+                            <input asp-for="ZCoordinate" class="form-control" />
+                            <span asp-validation-for="ZCoordinate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="ToaDoX" class="control-label">Map Position X</label>
+                            <input asp-for="ToaDoX" class="form-control" />
+                            <span asp-validation-for="ToaDoX" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="ToaDoY" class="control-label">Map Position Y</label>
+                            <input asp-for="ToaDoY" class="form-control" />
+                            <span asp-validation-for="ToaDoY" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="OverlayDirection" class="control-label">Overlay Direction</label>
+                            <select asp-for="OverlayDirection" class="form-control">
+                                <option value="top">top</option>
+                                <option value="bottom">bottom</option>
+                                <option value="left">left</option>
+                                <option value="right">right</option> 
+                            </select>
+                            <span asp-validation-for="OverlayDirection" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="COMMENT" class="control-label">Comments</label>
+                            <textarea asp-for="COMMENT" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="COMMENT" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group form-check mt-4">
+                            <label class="form-check-label">
+                                <input class="form-check-input" asp-for="IsActive" /> Active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save
+                    </button>
+                    <a asp-area="Admin" asp-controller="SensorInfos" asp-action="Details" asp-route-id="@Model.SensorInfoID" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Sensor
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Location Information
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Created By</dt>
+                <dd class="col-sm-9">User ID: @Model.CreatedByUserID</dd>
+
+                <dt class="col-sm-3">Created Date</dt>
+                <dd class="col-sm-9">@Model.CreatedDate?.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+
+                @if (Model.LastModifiedDate.HasValue) {
+                    <dt class="col-sm-3">Last Modified By</dt>
+                    <dd class="col-sm-9">User ID: @Model.LastModifiedByUserID</dd>
+
+                    <dt class="col-sm-3">Last Modified Date</dt>
+                    <dd class="col-sm-9">@Model.LastModifiedDate?.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                }
+            </dl>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

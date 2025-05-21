@@ -1,0 +1,22 @@
+﻿@model CleanroomMonitoring.Web.ViewComponents.SensorsSummaryViewModel
+
+<div class="card border-left-success shadow h-100 py-2">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                   Total Sensors
+                </div>
+                <div class="h2 mb-0 font-weight-bold text-gray-800">@Model.TotalSensors</div>
+                <div class="mt-2 small">
+                    <div><i class="bi bi-thermometer text-danger"></i> Temp: @Model.TemperatureSensors</div>
+                    <div><i class="bi bi-droplet text-primary"></i> Humidity: @Model.HumiditySensors</div>
+                    <div><i class="bi bi-arrow-down-up text-info"></i> Pressure: @Model.PressureSensors</div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <i class="bi bi-broadcast fa-2x text-gray-300"></i>
+            </div>
+        </div>
+    </div>
+</div>

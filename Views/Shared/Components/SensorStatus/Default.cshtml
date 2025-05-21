@@ -1,0 +1,67 @@
+﻿@* Views/Shared/Components/SensorStatus/Default.cshtml *@
+@model CleanroomMonitoring.Web.ViewModels.SensorStatusViewModel2
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Trạng thái cảm biến</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="mb-2">
+                    <span class="display-4">@Model.TotalSensors</span>
+                </div>
+                <div>Tổng số cảm biến</div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-2">
+                    <span class="display-4 text-success">@Model.ConnectedSensors</span>
+                </div>
+                <div>Đang kết nối</div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-2">
+                    <span class="display-4 text-danger">@Model.DisconnectedSensors</span>
+                </div>
+                <div>Ngắt kết nối</div>
+            </div>
+        </div>
+
+        @if (Model.SensorStatuses.Any()) {
+            <hr />
+            <h6>Sensor có vấn đề kết nối</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sensor ID</th>
+                            <th>Trạng thái</th>
+                            <th>Lần cuối kết nối</th>
+                            <th>Vấn đề</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var status in Model.SensorStatuses.Where(s => !s.IsConnected).Take(5)) {
+                            <tr>
+                                <td>@status.SensorInfoID</td>
+                                <td>
+                                    @if (status.IsConnected) {
+                                        <span class="badge bg-success">Kết nối</span>
+                                    }
+                                    else {
+                                        <span class="badge bg-danger">Ngắt kết nối</span>
+                                    }
+                                </td>
+                                <td>@(status.LastConnectionTime?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                <td>@status.LastIssueType</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    <div class="card-footer text-center">
+        <a href="/SensorStatus" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+    </div>
+</div>

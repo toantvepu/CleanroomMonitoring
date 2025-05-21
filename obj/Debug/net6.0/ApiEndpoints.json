@@ -1,0 +1,65 @@
+[
+  {
+    "ContainingType": "CleanroomMonitoring.Web.Controllers.AlertsApiController",
+    "Method": "HandleAlert",
+    "RelativePath": "api/Alerts/HandleAlert",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "CleanroomMonitoring.Web.Controllers.AlertsApiController\u002BHandleAlertRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CleanroomMonitoring.Web.Controllers.RoomDataController",
+    "Method": "GetRoomData",
+    "RelativePath": "api/RoomData/{roomId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roomId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "hours",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CleanroomMonitoring.Web.Controllers.Api.SensorDataApiController",
+    "Method": "GetRealTimeData",
+    "RelativePath": "api/SensorDataApi/realtime",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roomId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "CleanroomMonitoring.Web.Controllers.Api.RealTimeData",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
