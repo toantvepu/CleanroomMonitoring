@@ -1,0 +1,65 @@
+﻿/* Gauge styling */
+.gauge-container {
+    margin: 10px 0;
+    position: relative;
+}
+
+.gauge {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    height: 10px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    height: 100%;
+    background-color: #28a745;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+.gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2px;
+    color: #6c757d;
+    font-size: 0.7rem;
+}
+
+.gauge-zones {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    pointer-events: none;
+}
+
+.gauge-zone {
+    position: absolute;
+    height: 10px;
+}
+
+.zone-warning {
+    background-color: rgba(255, 193, 7, 0.3);
+}
+
+.mini-chart {
+    height: 60px;
+    margin-top: 15px;
+}
+
+/* Status colors */
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
