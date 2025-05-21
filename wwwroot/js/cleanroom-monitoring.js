@@ -219,7 +219,7 @@ function initializeSensorDisplay(data) {
     }
 
     // Tạo container cho từng loại cảm biến
-    const sensorContainers = document.querySelector('#sensorContainers');
+    const sensorContainers = document.querySelector('#sensorContainer');
     if (!sensorContainers) {
         console.error('Sensor containers element not found');
         return;
